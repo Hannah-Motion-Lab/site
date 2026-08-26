@@ -1,12 +1,12 @@
 // Hannah landing — the little that needs script.
-// 1) Copy buttons for the install command (top and closing band).
+// 1) Copy button for the install command.
 // 2) "Watch 30 s": if the demo video actually loaded, scroll to it and play it with sound;
 //    otherwise just scroll to the hero (the poster is what there is).
 // 3) The hero video only plays while it is on screen, and never autoplays for people who
 //    asked their OS for less motion.
 
 (function () {
-  const copyPairs = [['copy', 'cmd-linux'], ['copy-2', 'cmd-linux-2']];
+  const copyPairs = [['copy', 'cmd-linux']];
   for (const [btnId, codeId] of copyPairs) {
     const btn = document.getElementById(btnId);
     const code = document.getElementById(codeId);
