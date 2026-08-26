@@ -40,18 +40,20 @@ case "$(uname -s -m)" in
   *) die "unsupported platform: $(uname -s -m)." ;;
 esac
 
-say "looking for the latest release..."
-json="$(curl -fsSL "$API")" || die "could not reach GitHub. Check your connection and try again."
-url="$(printf '%s' "$json" \
-  | grep -o '"browser_download_url": *"[^"]*\.AppImage"' \
-  | head -n1 \
-  | sed 's/.*"\(https[^"]*\)"/\1/')"
-[ -n "$url" ] || die "no release published yet. Watch ${SITE} or https://github.com/${REPO}/releases for v1.0.0."
-
-say "found $(basename "$url")"
-
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
+
+say "looking for the latest release..."
+code="$(curl -fsSL -o "$tmp/release.json" -w '%{http_code}' "$API" 2>/dev/null)" || true
+case "${code:-000}" in
+  200) ;;
+  404) die "no release published yet. Watch ${SITE} or https://github.com/${REPO}/releases for v1.0.0." ;;
+  *) die "could not reach GitHub (HTTP ${code:-network error}). Check your connection and try again." ;;
+esac
+url="$(grep -o '"browser_download_url": *"[^"]*\.AppImage"' "$tmp/release.json" \
+  | head -n1 \
+  | sed 's/.*"\(https[^"]*\)"/\1/')"
+[ -n "$url" ] || die "the latest release has no AppImage asset yet. Check https://github.com/${REPO}/releases"
 
 say "downloading..."
 curl -fL --progress-bar -o "$tmp/$APP" "$url" || die "download failed. Try again or grab it directly from https://github.com/${REPO}/releases"
