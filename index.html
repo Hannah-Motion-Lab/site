@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0b12">
+  <title>Hannah — a real-time AI companion for your desktop</title>
+  <meta name="description" content="Hannah listens, speaks with her own voice, lip-syncs, emotes and gestures while she talks — and runs entirely on your machine. Install with one command.">
+  <meta property="og:title" content="Hannah — a real-time AI companion for your desktop">
+  <meta property="og:description" content="Voice, lip-sync, emotion and co-speech gestures. Fully local. Install with one command.">
+  <meta property="og:url" content="https://hannah-motion-lab.github.io/site/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23a78bfa'/%3E%3Cstop offset='1' stop-color='%23f472b6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2Z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="glow" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+        <defs>
+          <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a78bfa"/>
+            <stop offset="1" stop-color="#f472b6"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#brandGrad)" d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2Z"/>
+      </svg>
+      Hannah
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#requirements">Requirements</a>
+      <a href="#source">Source</a>
+      <a class="nav-github" href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">
+        GitHub
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero container">
+    <p class="badge"><span class="badge-dot" aria-hidden="true"></span> Linux build ready &middot; v1.0.0</p>
+    <h1>Hannah</h1>
+    <p class="tagline">A real-time AI companion that lives on your desktop.</p>
+    <p class="sub">
+      She listens, answers out loud with lip-sync and emotion, gestures while she speaks and
+      watches through your camera &mdash; running entirely on your own hardware.
+    </p>
+
+    <div class="term" role="group" aria-label="Install command">
+      <div class="term-head">
+        <span class="t-dot"></span><span class="t-dot"></span><span class="t-dot"></span>
+        <span class="t-title">bash</span>
+      </div>
+      <div class="cmd-row">
+        <span class="prompt" aria-hidden="true">$</span>
+        <code id="cmd-linux">curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash</code>
+        <button id="copy" class="copy-btn" type="button" aria-label="Copy install command">Copy</button>
+      </div>
+    </div>
+
+    <div class="os-tabs" role="tablist" aria-label="Choose your platform">
+      <button class="tab is-active" type="button" role="tab" aria-selected="true">Linux</button>
+      <button class="tab" type="button" role="tab" disabled title="Windows build coming soon">
+        Windows<span class="soon">soon</span>
+      </button>
+      <button class="tab" type="button" role="tab" disabled title="macOS build coming soon">
+        macOS<span class="soon">soon</span>
+      </button>
+    </div>
+
+    <p class="fineprint">Linux x86_64 &middot; ~103&nbsp;MB self-contained AppImage</p>
+  </section>
+
+  <section id="features" class="section container">
+    <p class="kicker">Capabilities</p>
+    <h2>More than a chat window.</h2>
+    <p class="lead">Every layer of the stack is local and streams in real time &mdash; from the first word you say to the gesture she answers with.</p>
+
+    <div class="grid">
+      <article class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+        </div>
+        <h3>Speaks &amp; listens</h3>
+        <p>Local speech recognition (Whisper) and neural TTS (Kokoro). Talk over her mid-sentence &mdash; she yields instantly and listens.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14a4.5 4.5 0 0 0 7 0"/><path d="M9.25 9.25v.01"/><path d="M14.75 9.25v.01"/></svg>
+        </div>
+        <h3>Lip-sync &amp; emotion</h3>
+        <p>Each sentence drives visemes and one of eight emotional expressions on a VRM avatar rendered in real time.</p>
+      </article>
+
+      <article class="card card-highlight">
+        <span class="card-tag">in-house model</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 5 12 2.5-6h4"/></svg>
+        </div>
+        <h3>Co-speech gestures</h3>
+        <p>A text-to-motion model trained by us turns every sentence into body language. She doesn't just talk &mdash; she moves.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Eyes on the room</h3>
+        <p>A local vision model reads your camera feed and reacts only when something in the scene actually changes.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7 9.5 3 3-3 3"/><path d="M12.5 15.5H17"/></svg>
+        </div>
+        <h3>Hands on the machine</h3>
+        <p>Opt-in terminal, app control and web search. Teach her new skills with plain markdown files &mdash; destructive commands ask first.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 7.5 3v5c0 4.5-3 8.5-7.5 10-4.5-1.5-7.5-5.5-7.5-10V6L12 3Z"/><path d="m9 11.5 2 2 4-4"/></svg>
+        </div>
+        <h3>Private by default</h3>
+        <p>Everything runs on your GPU. Audio never touches disk, transcripts never touch logs, the backend never leaves localhost.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="requirements" class="section container">
+    <p class="kicker">Requirements</p>
+    <h2>Light enough to live with you.</h2>
+
+    <div class="reqs-layout">
+      <dl class="req-list">
+        <div class="req-item">
+          <dt>Operating system</dt>
+          <dd>Linux x86_64 today. Windows and macOS builds compile through CI on every release tag.</dd>
+        </div>
+        <div class="req-item">
+          <dt>GPU</dt>
+          <dd>NVIDIA with CUDA recommended. AMD or CPU-only also works &mdash; voice gets slower.</dd>
+        </div>
+        <div class="req-item">
+          <dt>Brain</dt>
+          <dd><a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> with <code>qwen2.5:7b</code>, plus <code>nomic-embed-text</code> for long-term memory.</dd>
+        </div>
+        <div class="req-item">
+          <dt>Floating overlay</dt>
+          <dd>Works on Hyprland, KDE, GNOME, XFCE and friends via XWayland. <code>wmctrl</code>/<code>kdotool</code> unlock moving her by voice.</dd>
+        </div>
+      </dl>
+
+      <aside class="stat-panel">
+        <p class="stat-big">&le;&nbsp;16&nbsp;GB</p>
+        <p class="stat-label">of VRAM fits the entire stack: LLM, embeddings, TTS, ASR, vision and motion.</p>
+        <hr>
+        <p class="stat-small"><strong>~5 GB</strong> the qwen2.5:7b brain<br><strong>~103 MB</strong> the app itself</p>
+      </aside>
+    </div>
+
+    <details id="source" class="source-box">
+      <summary>Prefer building from source?</summary>
+      <pre><code>git clone https://github.com/Hannah-Motion-Lab/workspace.git Hannah-Motion
+cd Hannah-Motion
+git clone https://github.com/Hannah-Motion-Lab/backend.git   hannah-backend
+git clone https://github.com/Hannah-Motion-Lab/frontend.git  hannah-frontend
+git clone https://github.com/Hannah-Motion-Lab/motion-model.git hannah-motion-lab
+cat SETUP.md</code></pre>
+      <p class="source-note">The full guide lives in <a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">SETUP.md</a>.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="brand" href="#">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#brandGrad)" d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2Z"/></svg>
+        Hannah
+      </a>
+      <p>An AI companion that speaks, sees, gestures and acts &mdash; local-first, open and yours.</p>
+    </div>
+    <nav class="footer-col" aria-label="Project">
+      <h4>Project</h4>
+      <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">Workspace</a>
+      <a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">Setup guide</a>
+      <a href="https://github.com/Hannah-Motion-Lab/desktop/releases" target="_blank" rel="noopener">Releases</a>
+    </nav>
+    <nav class="footer-col" aria-label="Code">
+      <h4>Code</h4>
+      <a href="https://github.com/Hannah-Motion-Lab/backend" target="_blank" rel="noopener">backend</a>
+      <a href="https://github.com/Hannah-Motion-Lab/frontend" target="_blank" rel="noopener">frontend</a>
+      <a href="https://github.com/Hannah-Motion-Lab/desktop" target="_blank" rel="noopener">desktop</a>
+      <a href="https://github.com/Hannah-Motion-Lab/motion-model" target="_blank" rel="noopener">motion-model</a>
+    </nav>
+  </div>
+  <div class="container footer-bottom">
+    <p>&copy; 2026 Hannah Motion Lab</p>
+    <p>Built local-first.</p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
