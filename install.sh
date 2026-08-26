@@ -88,10 +88,17 @@ if ! has ollama; then
   sub "installing Ollama"
   curl -fsSL https://ollama.com/install.sh | sh
 fi
+# Ollama is a SYSTEM service, not part of Hannah: it is never bundled, and this script never
+# enrolls it with sudo. If it is already answering (however you run it) it is left alone; if
+# not, it is started for this session only and you are told how to make that permanent.
 if ! curl -sf -m 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
-  sub "starting ollama"
-  (systemctl --user enable --now ollama >/dev/null 2>&1 || sudo systemctl enable --now ollama >/dev/null 2>&1 || (nohup ollama serve >/dev/null 2>&1 &)) || true
+  sub "starting ollama for this session (no sudo, no service enrolled)"
+  (nohup ollama serve >/dev/null 2>&1 &) || true
   for _ in $(seq 1 20); do curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break; sleep 1; done
+  curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 || die "ollama did not start. Run 'ollama serve' in another terminal and re-run this installer."
+  warn "to have Ollama start at boot: systemctl --user enable --now ollama   (or: sudo systemctl enable --now ollama)"
+else
+  sub "ollama already running ✓ (left as is)"
 fi
 for m in qwen2.5:7b nomic-embed-text moondream; do
   if ollama list 2>/dev/null | awk '{print $1}' | grep -qx "$m" ; then sub "$m ✓"
