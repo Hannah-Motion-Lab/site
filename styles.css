@@ -258,3 +258,88 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
   .datarow { grid-template-columns: 120px 1fr 56px; }
   .footer-cols { gap: 32px; }
 }
+
+/* ── v3: the Jarvis structure. New blocks only; tokens and everything above unchanged. ── */
+
+/* text-style button (the "Watch 30 s" secondary CTA) */
+.link-btn { background: none; border: 0; padding: 0; font: inherit; font-size: 15px; cursor: pointer; }
+.hero-shot video { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--fog-3); background: var(--panel); }
+
+/* pillars band */
+.pillars-band { border-top: 1px solid var(--fog-2); border-bottom: 1px solid var(--fog-2); padding: 56px 0; }
+.pillars-title { font-size: clamp(24px, 2.4vw, 30px); margin-bottom: 28px; }
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+.pillar h3 { color: var(--neon); font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+.pillar p { color: var(--text-2); font-size: 15.5px; }
+.pillar-num { margin-top: 12px; font-size: 13.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.pillar-num span { color: var(--text); font-weight: 600; }
+
+/* what you can say */
+.says { padding-top: 72px; padding-bottom: 24px; }
+.says .lede { margin-bottom: 26px; }
+.says-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 40px; }
+.says .transcript { border-left-color: var(--fog-2); }
+.transcript .note { display: block; grid-template-columns: none; margin-top: 8px; font-size: 13px; color: var(--text-3); }
+.says .src { margin-top: 26px; }
+
+/* "how she decides" details inside Hands */
+.how { margin-top: 22px; }
+.how summary { cursor: pointer; font-weight: 500; color: var(--text-2); }
+.how summary:hover { color: var(--text); }
+.how .facts { margin-top: 12px; }
+.how .facts div { grid-template-columns: 120px 1fr; }
+
+/* fit: two tiers + measured VRAM */
+.fit { background: var(--panel); border-top: 1px solid var(--fog-2); border-bottom: 1px solid var(--fog-2); padding: 72px 0; }
+.fit .lede { margin-bottom: 28px; max-width: 70ch; }
+.tiers { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.tier-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.tier-table th, .tier-table td { padding: 11px 12px 11px 0; border-top: 1px solid var(--fog-2); text-align: left; vertical-align: top; }
+.tier-table thead th { border-top: 0; padding-top: 0; color: var(--text); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.tier-table thead th:nth-child(3) { color: var(--neon); }
+.tier-table tbody th { width: 110px; color: var(--text-3); font-weight: 500; }
+.tier-table td { color: var(--text-2); }
+.tier-table tr:last-child th, .tier-table tr:last-child td { border-bottom: 1px solid var(--fog-2); }
+.fit .stack { background: var(--void); }
+.fit .seg { border-right-color: var(--panel); }
+.fit .src { margin-top: 18px; }
+
+/* after install steps */
+.after { margin: 22px 0 0 0; padding-left: 22px; display: grid; gap: 8px; font-size: 15px; color: var(--text-2); }
+.after li::marker { color: var(--neon); font-weight: 600; }
+
+/* from the maker */
+.letter { padding-top: 80px; padding-bottom: 24px; }
+.letter-body { max-width: 66ch; display: grid; gap: 14px; }
+.letter-body p { font-size: 16.5px; color: var(--text-2); }
+.letter-sign { font-family: var(--serif); color: var(--text) !important; margin-top: 4px; }
+.letter-links { margin-top: 26px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.btn-ghost { background: transparent; color: var(--neon); }
+.btn-ghost:hover { background: var(--neon-dim); }
+
+/* faq */
+.faq { padding: 72px 0 24px; }
+.faq-inner { max-width: 820px; margin: 0 auto; }
+.faq-list { display: grid; gap: 0; margin-top: 8px; }
+.faq-list div { padding: 18px 0; border-top: 1px solid var(--fog-2); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 24px; }
+.faq-list div:last-child { border-bottom: 1px solid var(--fog-2); }
+.faq-list dt { font-weight: 600; color: var(--text); font-size: 15.5px; }
+.faq-list dd { color: var(--text-2); font-size: 15px; }
+
+/* closing band */
+.cta-band { padding: 88px 0; border-top: 1px solid var(--fog-2); }
+.cta-inner { max-width: 820px; margin: 0 auto; text-align: center; }
+.cta-inner h2 { font-size: clamp(32px, 3.6vw, 44px); margin-bottom: 22px; }
+.cta-inner .cmd { text-align: left; }
+.cta-inner .hero-fine { margin-top: 16px; }
+
+@media (max-width: 960px) {
+  .pillars { grid-template-columns: 1fr; gap: 26px; }
+  .says-grid { grid-template-columns: 1fr; }
+  .tiers { grid-template-columns: 1fr; gap: 36px; }
+  .faq-list div { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 680px) {
+  .tier-table { font-size: 13.5px; }
+  .tier-table tbody th { width: 84px; }
+}
