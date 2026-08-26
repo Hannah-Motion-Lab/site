@@ -3,127 +3,183 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0b0c19">
-  <title>Hannah — an AI companion that lives on your desktop</title>
-  <meta name="description" content="Hannah listens, answers in her own voice, and gestures while she speaks. A 3D companion that floats on your desktop and runs on your own GPU. One command to install.">
-  <meta property="og:title" content="Hannah — an AI companion that lives on your desktop">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f4f1ea">
+  <title>Hannah — a local AI companion for your desktop</title>
+  <meta name="description" content="Hannah is a 3D companion that listens, speaks in her own voice and gestures while she talks — running on your own GPU. Voice, vision, memory, a real terminal and an agent for multi-step tasks. One command to install.">
+  <meta property="og:title" content="Hannah — a local AI companion for your desktop">
   <meta property="og:description" content="She listens, speaks, gestures and acts — on your own hardware. One command to install.">
-  <meta property="og:image" content="https://hannah-motion-lab.github.io/site/assets/hero.jpg">
+  <meta property="og:image" content="https://hannah-motion-lab.github.io/site/assets/app.jpg">
   <meta property="og:url" content="https://hannah-motion-lab.github.io/site/">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0c19'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia,serif' font-size='20' fill='%23e1dedc'%3EH%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f1117'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='19' fill='%23f4f1ea'%3EH%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#">Hannah</a>
+    <a class="brand" href="#"><span class="brand-mark" aria-hidden="true">H</span>Hannah</a>
     <nav class="nav-links" aria-label="Site">
-      <a href="#meet">What she does</a>
-      <a href="#install">Install</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#setup">Setup</a>
       <a href="#requirements">Requirements</a>
-      <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">Source</a>
+      <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">GitHub</a>
     </nav>
+    <a class="btn btn-dark" href="#install">Install</a>
   </div>
 </header>
 
 <main>
 
-  <!-- The thesis is Hannah herself: a real render, not a title in a gradient. -->
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="wrap hero-grid">
-      <div class="hero-text">
-        <h1 id="hero-title">Hannah</h1>
-        <p class="lede">An AI companion that lives on your desktop. She listens, answers in her own voice, and moves while she talks &mdash; on your own hardware.</p>
-        <a class="cta" href="#install">Install on Linux</a>
-        <p class="hero-note">Free and open source &middot; runs on your GPU &middot; nothing leaves your machine by default</p>
+  <!-- HERO — copy left, the product in use on the right -->
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">A companion that lives on your desktop.</h1>
+      <p class="lede">Hannah listens, answers in her own voice and moves while she talks. Voice, vision, memory and a real terminal &mdash; all on your own GPU.</p>
+      <div class="hero-actions">
+        <a class="btn btn-dark btn-lg" href="#install">Install on Linux</a>
+        <a class="link-arrow" href="#capabilities">See what she does</a>
       </div>
-      <figure class="hero-media">
-        <img class="hero-img" src="assets/hero.jpg" width="1200" height="820" alt="Hannah, a 3D companion with dark hair and a white dress, standing in a deep blue space and looking at you" fetchpriority="high">
-      </figure>
+      <p class="hero-fine">Free &amp; open source &middot; MIT &middot; nothing leaves your machine by default</p>
     </div>
+    <figure class="hero-shot">
+      <img src="assets/app.jpg" width="1600" height="1000" alt="Hannah's window: the 3D avatar in a deep blue space, controls in the top-right corner and a text bar at the bottom" fetchpriority="high">
+    </figure>
   </section>
 
-  <!-- What she does: prose and real captures, in the order a first conversation happens. -->
-  <section id="meet" class="section wrap" aria-labelledby="meet-title">
-    <h2 id="meet-title">She is a presence, not a chat window.</h2>
-
-    <div class="feature">
-      <div class="feature-text">
-        <h3>You talk. She answers out loud.</h3>
-        <p>Speech recognition and a neural voice run locally, so there is no round trip to a server between your sentence and hers. Interrupt her mid-sentence and she stops and listens.</p>
-        <p class="fine">Whisper for listening, Kokoro for the voice. Sub-second from the end of your sentence to the start of hers.</p>
-      </div>
-      <figure class="feature-media">
-        <img src="assets/portrait.jpg" width="760" height="750" alt="Close-up of Hannah's face, green eyes looking at the viewer" loading="lazy">
-      </figure>
-    </div>
-
-    <div class="feature feature-flip">
-      <div class="feature-text">
-        <h3>She moves while she speaks.</h3>
-        <p>Every sentence is turned into body language by a text-to-motion model we trained ourselves, and mapped onto her skeleton from geometry rather than guesswork. She gestures, shifts her weight, looks at you.</p>
-        <p class="fine">Eight facial expressions, lip-sync per syllable, and a gaze that follows your cursor across monitors.</p>
-      </div>
-      <figure class="feature-media media-tall">
-        <img src="assets/gesture.jpg" width="420" height="700" alt="Hannah mid-sentence, one hand raised to her chest as she talks" loading="lazy">
-      </figure>
-    </div>
-
-    <div class="feature">
-      <div class="feature-text">
-        <h3>She lives on the desktop, not in a tab.</h3>
-        <p>A small window that stays on top of everything, on every workspace, and remembers where you left it. Say &ldquo;go to the other screen&rdquo; and she does. Works the same on GNOME, KDE, XFCE and Hyprland.</p>
-        <p class="fine">400&times;620 by default. Close the window and the whole stack shuts down and frees your GPU.</p>
-      </div>
-      <figure class="feature-media media-widget">
-        <img src="assets/overlay.png" width="400" height="620" alt="The compact Hannah overlay window as it appears on a desktop" loading="lazy">
-      </figure>
-    </div>
-
-    <div class="feature feature-flip">
-      <div class="feature-text">
-        <h3>She can see, and she can act.</h3>
-        <p>With the camera on, a local vision model describes what is in front of her and she reacts only when something actually changes. Turn on tools and she opens apps, runs commands in a real terminal, and searches the web &mdash; anything destructive asks you first.</p>
-        <p>For jobs that take several steps &mdash; &ldquo;organize my downloads by type&rdquo; &mdash; she hands the work to a separate agent and narrates what it does. The agent never speaks; she is the only voice.</p>
-        <p class="fine">Tools, terminal and the agent are all off by default. Teach her new skills with a markdown file.</p>
-      </div>
-      <figure class="feature-media">
-        <div class="transcript" aria-label="Example conversation">
-          <p><span class="who">you</span> organize my downloads by type</p>
-          <p><span class="who her">hannah</span> On it. I&rsquo;ll sort them into folders by what they are.</p>
-          <p><span class="who her">hannah</span> I need permission to create four folders in Downloads &mdash; yes or no?</p>
-          <p><span class="who">you</span> yes</p>
-          <p><span class="who her">hannah</span> Done. Twenty-three files moved into four folders.</p>
-        </div>
-      </figure>
-    </div>
-  </section>
-
-  <!-- Install: the one command, said plainly. -->
-  <section id="install" class="section section-install" aria-labelledby="install-title">
+  <!-- STRIP — what she runs on. Real names; no invented customer logos. -->
+  <section class="strip" aria-label="Built on">
     <div class="wrap">
-      <h2 id="install-title">One command.</h2>
-      <p class="install-lede">The installer sets up everything on your machine: the model server and models, the voice, the gesture model, the overlay, and a <code>hannah</code> command to bring it all up.</p>
+      <p class="strip-label">Runs on open models and open tools</p>
+      <ul class="strip-list">
+        <li>Ollama</li><li>Qwen 2.5</li><li>Whisper</li><li>Kokoro</li><li>Moondream</li><li>VRM / VRoid</li><li>SMPL-X</li><li>Electron</li><li>three.js</li>
+      </ul>
+    </div>
+  </section>
 
+  <!-- CAPABILITIES — sticky index left, data-backed sections right -->
+  <section id="capabilities" class="wrap caps" aria-label="Capabilities">
+    <aside class="caps-index" aria-label="On this page">
+      <a href="#c-voice">Real-time voice</a>
+      <a href="#c-motion">Co-speech motion</a>
+      <a href="#c-desktop">Lives on the desktop</a>
+      <a href="#c-act">Sees and acts</a>
+      <a href="#c-private">Your data stays yours</a>
+    </aside>
+
+    <div class="caps-body">
+
+      <article id="c-voice" class="cap">
+        <h2>Real-time voice</h2>
+        <p>Speech recognition and a neural voice run on your machine. She starts answering while the model is still writing, one sentence at a time, and yields the instant you talk over her.</p>
+        <div class="datagrid">
+          <div class="datarow"><span class="dl">Language model</span><span class="bar"><i style="--w:15%"></i></span><span class="dv">0.72 s</span></div>
+          <div class="datarow"><span class="dl">First spoken sentence</span><span class="bar"><i style="--w:94%"></i></span><span class="dv">4.7 s</span></div>
+          <div class="datarow"><span class="dl">Interrupt to silence</span><span class="bar"><i style="--w:2%"></i></span><span class="dv">&lt; 0.1 s</span></div>
+        </div>
+        <p class="src">Measured on a text turn, local stack, RTX 5070 Ti. The first sentence waits for its own audio to synthesize; the rest stream behind it.</p>
+      </article>
+
+      <article id="c-motion" class="cap">
+        <h2>Co-speech motion</h2>
+        <p>Every sentence is turned into body language by a text-to-motion model trained in-house, then mapped onto her skeleton from geometry rather than guesswork. Eight facial expressions, lip-sync per syllable, a gaze that follows your cursor.</p>
+        <div class="shots-2">
+          <figure><img src="assets/gesture.jpg" width="420" height="580" alt="Hannah mid-sentence, one hand raised to her chest" loading="lazy"><figcaption>A gesture generated from the sentence she is saying</figcaption></figure>
+          <figure><img src="assets/portrait.jpg" width="760" height="640" alt="Close-up of Hannah's face looking at the viewer" loading="lazy"><figcaption>Expression, blink and gaze, layered over the motion</figcaption></figure>
+        </div>
+        <dl class="facts">
+          <div><dt>Model</dt><dd>Our own text&rarr;motion model, served on <code>:8005</code></dd></div>
+          <div><dt>Output</dt><dd>55 SMPL-X joints at 30&nbsp;fps, per sentence</dd></div>
+          <div><dt>Retarget</dt><dd>Computed from both rigs&rsquo; rest pose &mdash; no hand-tuned rotations</dd></div>
+        </dl>
+      </article>
+
+      <article id="c-desktop" class="cap">
+        <h2>Lives on the desktop</h2>
+        <p>A small window that stays on top of everything, on every workspace, and remembers where you left it. Say &ldquo;go to the other screen&rdquo; and she moves. Close it and the whole stack shuts down and frees your GPU.</p>
+        <div class="desktop-row">
+          <figure class="widget-shot"><img src="assets/overlay.png" width="400" height="620" alt="The compact 400 by 620 Hannah window as it sits on a desktop" loading="lazy"><figcaption>The overlay, actual size</figcaption></figure>
+          <div>
+            <p class="sub">Works the same on</p>
+            <ul class="grid-tiles">
+              <li>GNOME</li><li>KDE Plasma</li><li>Hyprland</li><li>XFCE</li><li>Cinnamon</li><li>sway / i3</li>
+            </ul>
+            <p class="src">Under Wayland the window runs through XWayland so it can stay on top &mdash; native Wayland forbids it by design. <code>hannah doctor</code> tells you what your desktop supports.</p>
+          </div>
+        </div>
+      </article>
+
+      <article id="c-act" class="cap">
+        <h2>Sees and acts</h2>
+        <p>With the camera on, a local vision model describes what is in front of her and she reacts only when the scene actually changes. Turn on tools and she opens apps, runs commands in a real terminal and searches the web. Anything destructive asks you first.</p>
+        <figure class="wide-shot"><img src="assets/terminal.jpg" width="1100" height="340" alt="Hannah's window split with a real terminal panel at the bottom" loading="lazy"><figcaption>The terminal panel: a real shell, so you can see exactly what she ran</figcaption></figure>
+        <div class="two-col">
+          <div>
+            <h3>Two ways to act</h3>
+            <dl class="facts">
+              <div><dt><code>[RUN:]</code></dt><dd>One command she already knows the shape of. Instant, handled by the backend.</dd></div>
+              <div><dt><code>[TASK:]</code></dt><dd>A job with several steps &mdash; &ldquo;organize my downloads by type&rdquo; &mdash; handed to a separate agent with risk-tiered approvals and an audit log.</dd></div>
+            </dl>
+          </div>
+          <div class="transcript" aria-label="Example exchange">
+            <p><span class="who">you</span>organize my downloads by type</p>
+            <p><span class="who her">hannah</span>On it. I&rsquo;ll sort them into folders by what they are.</p>
+            <p><span class="who her">hannah</span>I need permission to create four folders in Downloads &mdash; yes or no?</p>
+            <p><span class="who">you</span>yes</p>
+            <p><span class="who her">hannah</span>Done. Twenty-three files moved into four folders.</p>
+          </div>
+        </div>
+        <p class="src">One voice, two hands: the agent never speaks. Every event it produces is narrated by her, and she cannot claim a task finished unless the event stream says so.</p>
+      </article>
+
+      <article id="c-private" class="cap">
+        <h2>Your data stays yours</h2>
+        <ul class="checks">
+          <li><strong>Local</strong> The brain, the voice, listening, vision and motion all run on your GPU. The backend binds to <code>127.0.0.1</code>.</li>
+          <li><strong>Private</strong> Audio never touches disk. Transcripts never touch logs. Long-term memory is a SQLite file in your home.</li>
+          <li><strong>Off by default</strong> Tools, the terminal and the agent are opt-in flags. The only thing that can leave the machine is the agent&rsquo;s model, and you turn that on knowingly.</li>
+          <li><strong>Open</strong> MIT-licensed code across every repository. The one asset that is not ours, the SMPL-X body model, stays out of git under its own license.</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- SETUP — bring your own providers, shown with the real settings panel -->
+  <section id="setup" class="setup">
+    <div class="wrap setup-inner">
+      <div class="setup-copy">
+        <h2>Bring your own providers.</h2>
+        <p>Everything ships local. If you want a bigger brain, point her at any OpenAI-compatible endpoint from the settings panel &mdash; no restart, and API keys never come back to the browser.</p>
+        <ul class="grid-tiles">
+          <li>Ollama <span>local</span></li><li>OpenRouter</li><li>Groq</li><li>OpenAI</li><li>Anthropic</li><li>ElevenLabs <span>voice</span></li>
+        </ul>
+        <p class="src">Teach her new skills with a markdown file: a description, one action, and the phrases that trigger it. The model picks the skill; the backend runs the command.</p>
+      </div>
+      <figure class="settings-shot"><img src="assets/settings.jpg" width="380" height="820" alt="The settings panel: language model provider chips, voice, and the agent's API key field" loading="lazy"></figure>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install" class="install">
+    <div class="wrap install-inner">
+      <h2>One command.</h2>
+      <p class="lede">The installer sets up the whole stack on your machine: the model server and models, the voice, the gesture model, the agent, the overlay, and a <code>hannah</code> command to bring it all up.</p>
       <div class="cmd" role="group" aria-label="Install command">
+        <span class="cmd-prompt" aria-hidden="true">$</span>
         <code id="cmd-linux">curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash</code>
         <button id="copy" class="copy" type="button" aria-label="Copy install command">Copy</button>
       </div>
-
-      <dl class="install-facts">
-        <div><dt>Then</dt><dd><code>hannah</code> starts her. <code>hannah doctor</code> tells you what your desktop supports. <code>hannah stop</code> shuts everything down.</dd></div>
-        <div><dt>Size</dt><dd>About 20&nbsp;GB once the models are in place. They are built and downloaded on your machine, not bundled.</dd></div>
-        <div><dt>Platforms</dt><dd>Linux x86_64 today. Windows and macOS builds exist in the repository and are untested.</dd></div>
+      <dl class="facts facts-row">
+        <div><dt>Then</dt><dd><code>hannah</code> starts her &middot; <code>hannah doctor</code> checks your desktop &middot; <code>hannah stop</code> frees the GPU</dd></div>
+        <div><dt>Size</dt><dd>~20&nbsp;GB with models, built and downloaded on your machine</dd></div>
+        <div><dt>Platform</dt><dd>Linux x86_64. Windows and macOS builds exist and are untested.</dd></div>
       </dl>
-
       <details class="source">
-        <summary>Prefer to build from source?</summary>
-        <p>Clone the workspace and its four repositories side by side, then follow <code>SETUP.md</code> &mdash; it is the same steps the installer runs, written out.</p>
+        <summary>Build from source instead</summary>
 <pre><code>git clone https://github.com/Hannah-Motion-Lab/workspace.git Hannah-Motion
 cd Hannah-Motion
 git clone https://github.com/Hannah-Motion-Lab/backend.git      hannah-backend
@@ -135,35 +191,60 @@ cat SETUP.md</code></pre>
     </div>
   </section>
 
-  <!-- Requirements: a sober table, no stat tiles. -->
-  <section id="requirements" class="section wrap" aria-labelledby="req-title">
-    <h2 id="req-title">What she needs.</h2>
-    <table class="req">
-      <tbody>
-        <tr><th scope="row">GPU</th><td>NVIDIA with CUDA, up to 16&nbsp;GB of VRAM for the full stack. AMD or CPU-only also works; the voice gets slower.</td></tr>
-        <tr><th scope="row">Brain</th><td><a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> running <code>qwen2.5:7b</code>, with <code>nomic-embed-text</code> for long-term memory and <code>moondream</code> for vision. The installer pulls all three.</td></tr>
-        <tr><th scope="row">System</th><td>Linux x86_64, Node 20+, Python 3.12+. The installer handles the rest.</td></tr>
-        <tr><th scope="row">Desktop</th><td>Any: the overlay runs under XWayland so it can stay on top everywhere. <code>wmctrl</code> or <code>kdotool</code> let you move her by voice.</td></tr>
-        <tr><th scope="row">Privacy</th><td>Audio never touches disk and transcripts never touch logs. The only thing that leaves your machine is the optional agent&rsquo;s model, which you enable knowingly.</td></tr>
-      </tbody>
-    </table>
+  <!-- REQUIREMENTS — with the VRAM budget, measured -->
+  <section id="requirements" class="wrap reqs" aria-labelledby="req-title">
+    <h2 id="req-title">What she needs</h2>
+    <div class="reqs-grid">
+      <div class="vram">
+        <p class="sub">VRAM with everything loaded</p>
+        <div class="stack">
+          <div class="seg" style="--w:34%"><span>Brain 4.8 GB</span></div>
+          <div class="seg" style="--w:17%"><span>Vision 2.4</span></div>
+          <div class="seg" style="--w:8%"></div>
+          <div class="seg" style="--w:6%"></div>
+          <div class="seg" style="--w:6%"></div>
+          <div class="seg seg-free" style="--w:29%"><span>free</span></div>
+        </div>
+        <ul class="legend"><li><i style="background:#0f1117"></i>Brain 4.8 GB</li><li><i style="background:#2a2d38"></i>Vision 2.4</li><li><i style="background:#3e4048"></i>Motion 1.2</li><li><i style="background:#565962"></i>Voice 0.9</li><li><i style="background:#6f7178"></i>Listening 0.8</li><li><i class="free"></i>Free 1.9</li></ul>
+        <p class="vram-total"><strong>14.1 GB</strong> of 16 GB in use, measured on an RTX 5070 Ti with every model resident.</p>
+      </div>
+      <table class="req">
+        <tbody>
+          <tr><th scope="row">GPU</th><td>NVIDIA with CUDA recommended. AMD or CPU-only work too; the voice gets slower.</td></tr>
+          <tr><th scope="row">Models</th><td><code>qwen2.5:7b</code> (4.7&nbsp;GB) &middot; <code>moondream</code> (1.7&nbsp;GB) &middot; <code>nomic-embed-text</code> (274&nbsp;MB). The installer pulls them.</td></tr>
+          <tr><th scope="row">System</th><td>Linux x86_64 &middot; Node 20+ &middot; Python 3.12+ &middot; Ollama</td></tr>
+          <tr><th scope="row">Desktop</th><td>Any. <code>wmctrl</code> or <code>kdotool</code> let you move her by voice.</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
 </main>
 
 <footer class="footer">
   <div class="wrap footer-inner">
-    <p class="footer-brand">Hannah</p>
-    <nav class="footer-links" aria-label="Project links">
-      <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">Workspace</a>
-      <a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">Setup guide</a>
-      <a href="https://github.com/Hannah-Motion-Lab/desktop/releases" target="_blank" rel="noopener">Releases</a>
-      <a href="https://github.com/Hannah-Motion-Lab/backend" target="_blank" rel="noopener">Backend</a>
-      <a href="https://github.com/Hannah-Motion-Lab/frontend" target="_blank" rel="noopener">Frontend</a>
-      <a href="https://github.com/Hannah-Motion-Lab/motion-model" target="_blank" rel="noopener">Motion model</a>
+    <div>
+      <p class="footer-brand">Hannah</p>
+      <p class="footer-tag">A local AI companion. Open source, MIT.</p>
+    </div>
+    <nav class="footer-cols" aria-label="Project links">
+      <div>
+        <p class="footer-h">Project</p>
+        <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">Workspace</a>
+        <a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">Setup guide</a>
+        <a href="https://github.com/Hannah-Motion-Lab/desktop/releases" target="_blank" rel="noopener">Releases</a>
+      </div>
+      <div>
+        <p class="footer-h">Code</p>
+        <a href="https://github.com/Hannah-Motion-Lab/backend" target="_blank" rel="noopener">Backend</a>
+        <a href="https://github.com/Hannah-Motion-Lab/frontend" target="_blank" rel="noopener">Frontend</a>
+        <a href="https://github.com/Hannah-Motion-Lab/desktop" target="_blank" rel="noopener">Desktop</a>
+        <a href="https://github.com/Hannah-Motion-Lab/motion-model" target="_blank" rel="noopener">Motion model</a>
+        <a href="https://github.com/Hannah-Motion-Lab/agent" target="_blank" rel="noopener">Agent</a>
+      </div>
     </nav>
-    <p class="footer-fine">&copy; 2026 Hannah Motion Lab &middot; MIT</p>
   </div>
+  <div class="wrap footer-fine">&copy; 2026 Hannah Motion Lab</div>
 </footer>
 
 <script src="main.js"></script>
