@@ -1,31 +1,18 @@
-const copyBtn = document.getElementById('copy');
-const cmdEl = document.getElementById('cmd-linux');
-let resetTimer;
+// Copy the install command. Nothing else on the page needs JavaScript.
+const btn = document.getElementById('copy');
+const cmd = document.getElementById('cmd-linux');
+let reset;
 
-function legacyCopy(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.setAttribute('readonly', '');
-  ta.style.position = 'fixed';
-  ta.style.opacity = '0';
-  document.body.appendChild(ta);
-  ta.select();
-  document.execCommand('copy');
-  ta.remove();
-}
-
-copyBtn.addEventListener('click', async () => {
-  const text = cmdEl.textContent.trim();
+btn.addEventListener('click', async () => {
+  const text = cmd.textContent.trim();
   try {
     await navigator.clipboard.writeText(text);
   } catch {
-    legacyCopy(text);
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
   }
-  copyBtn.classList.add('done');
-  copyBtn.textContent = 'Copied ✓';
-  clearTimeout(resetTimer);
-  resetTimer = setTimeout(() => {
-    copyBtn.classList.remove('done');
-    copyBtn.textContent = 'Copy';
-  }, 1600);
+  btn.classList.add('done'); btn.textContent = 'Copied';
+  clearTimeout(reset);
+  reset = setTimeout(() => { btn.classList.remove('done'); btn.textContent = 'Copy'; }, 1600);
 });
