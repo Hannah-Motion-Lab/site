@@ -43,6 +43,10 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
   exit 0
 fi
 
+# Everything below lives inside main() so a `curl | bash` that gets cut off half-way runs
+# NOTHING: bash only executes the function once its closing brace has arrived.
+main() {
+
 # ── platform ──────────────────────────────────────────────────────────────────────────
 case "$(uname -s -m)" in
   "Linux x86_64") ;;
@@ -72,10 +76,15 @@ fi
 has node || die "node is required (20+)."
 node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' || die "node 20+ is required (found $(node -v))."
 has python3 || die "python3 is required (3.12+)."
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+# third-party installers: to a file first, then run — never `curl | sh` (a cut-off download
+# would otherwise run half a script). Their content is whatever the vendor serves today.
+fetch_script() { curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"; }
 # uv creates the venvs far faster than pip; install it to the user if the distro has none.
 if ! has uv; then
   sub "installing uv (fast Python installer) into ~/.local/bin"
-  curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || warn "uv install failed; falling back to pip (slower)"
+  fetch_script "https://astral.sh/uv/install.sh" "$tmp/uv-install.sh" && sh "$tmp/uv-install.sh" >/dev/null 2>&1 \
+    || warn "uv install failed; falling back to pip (slower)"
   export PATH="$HOME/.local/bin:$PATH"
 fi
 NVIDIA=""
@@ -86,7 +95,8 @@ else warn "no NVIDIA GPU detected: the voice and gesture models will run on CPU 
 say "Ollama (the brain)"
 if ! has ollama; then
   sub "installing Ollama"
-  curl -fsSL https://ollama.com/install.sh | sh
+  if [ "${PKG%% *}" = "sudo" ] && [ "$(echo "$PKG" | awk '{print $2}')" = "pacman" ]; then $PKG ollama
+  else fetch_script "https://ollama.com/install.sh" "$tmp/ollama-install.sh" && sh "$tmp/ollama-install.sh"; fi
 fi
 # Ollama is a SYSTEM service, not part of Hannah: it is never bundled, and this script never
 # enrolls it with sudo. If it is already answering (however you run it) it is left alone; if
@@ -118,10 +128,10 @@ clone() {  # clone <repo> <dir>
     sub "$2 ✓"
   fi
 }
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 # the workspace repo IS the root (launcher + docs); the others are its subfolders
 if [ -d "$ROOT/.git" ]; then (cd "$ROOT" && git pull -q --ff-only 2>/dev/null || true); sub "workspace ✓ (updated)"
 else
+  rm -rf "$ROOT.tmp"   # a previous run that died mid-clone leaves this behind
   git clone -q "https://github.com/${ORG}/workspace.git" "$ROOT.tmp" 2>"$tmp/git.err" \
     || die "could not clone ${ORG}/workspace: $(tail -1 "$tmp/git.err"). If the repo is private you need access; otherwise check your connection."
   cp -a "$ROOT.tmp/." "$ROOT/" && rm -rf "$ROOT.tmp"; sub "workspace ✓"
@@ -179,7 +189,20 @@ say "gesture model (text → motion)"
 
 # ── 5. weights that are not in git ────────────────────────────────────────────────────
 say "model weights"
-dl() { curl -fL --progress-bar -o "$2" "$1" || die "download failed: $1"; }
+# download to a temp file, verify against SHA256SUMS when the release ships one, then move into
+# place — a half-written file never gets the final name, and a tampered one never gets used.
+dl() {
+  local part="$2.part"
+  curl -fL --proto '=https' --tlsv1.2 --progress-bar -o "$part" "$1" || { rm -f "$part"; die "download failed: $1"; }
+  if [ -s "$tmp/SHA256SUMS" ]; then
+    local want; want="$(grep -E " [*]?$(basename "$1")\$" "$tmp/SHA256SUMS" | awk '{print $1}' | head -1)"
+    if [ -n "$want" ]; then
+      local got; got="$(sha256sum "$part" | awk '{print $1}')"
+      [ "$got" = "$want" ] || { rm -f "$part"; die "checksum mismatch for $(basename "$1") — the download is corrupt or tampered; nothing was installed"; }
+    else warn "$(basename "$1") is not listed in SHA256SUMS: installed unverified"; fi
+  fi
+  mv -f "$part" "$2"
+}
 ( cd "$ROOT/hannah-backend/sidecar/tts"
   [ -f kokoro-v1.0.onnx ] || { sub "Kokoro voice model (311 MB)"; dl "$KOKORO/kokoro-v1.0.onnx" kokoro-v1.0.onnx; }
   [ -f voices-v1.0.bin ]  || { sub "Kokoro voices (27 MB)";       dl "$KOKORO/voices-v1.0.bin"  voices-v1.0.bin; }
@@ -188,6 +211,9 @@ say "looking up the latest Hannah release"
 code="$(curl -fsSL -o "$tmp/release.json" -w '%{http_code}' "$API" 2>/dev/null)" || true
 [ "${code:-000}" = "200" ] || die "could not read the latest release (HTTP ${code:-network error}). https://github.com/${RELEASE_REPO}/releases"
 asset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/release.json" | head -n1 | sed 's/.*"\(https[^"]*\)"/\1/'; }
+sums="$(asset SHA256SUMS)"
+if [ -n "$sums" ]; then curl -fsSL --proto '=https' --tlsv1.2 -o "$tmp/SHA256SUMS" "$sums" || warn "could not fetch SHA256SUMS: downloads will not be verified"
+else warn "this release ships no SHA256SUMS: downloads will not be verified"; fi
 ( cd "$ROOT/hannah-motion-lab"
   mkdir -p runs/vae runs/flow
   [ -f runs/vae/latest.pt ]  || { sub "gesture model: vae (174 MB)";  dl "$(asset motion-vae-latest.pt)"  runs/vae/latest.pt; }
@@ -197,7 +223,7 @@ asset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/release.json" 
 # ── 6. the hands (agent) ──────────────────────────────────────────────────────────────
 say "agent (the hands) — off until you add an API key"
 export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"
-if ! has bun; then sub "installing bun"; curl -fsSL https://bun.sh/install | bash >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"; fi
+if ! has bun; then sub "installing bun"; fetch_script "https://bun.sh/install" "$tmp/bun-install.sh" && bash "$tmp/bun-install.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"; fi
 if has bun; then
   ( cd "$ROOT/hannah-agent"
     [ -d node_modules ] || bun install >/dev/null 2>&1
@@ -244,3 +270,6 @@ cat <<EOF
       ${BIN_DIR}/Hannah.AppImage --appimage-extract-and-run
 
 EOF
+}
+
+main "$@"
