@@ -141,6 +141,10 @@ say "backend"
     # defaults that make it work on the first try: the brain that is best at actions, and
     # the local ASR (the example points at the cloud, which needs an OpenAI key)
     sed -i 's/^LLM_MODEL=.*/LLM_MODEL=qwen2.5:7b/; s/^ASR_PROVIDER=.*/ASR_PROVIDER=local/' .env
+    # the backend<->agent bearer: generated now so the agent is never reachable without it
+    tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+    sed -i "s|^#\?[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
+    chmod 600 .env
     sub ".env created (edit it to enable tools/terminal/agent)"
   else sub ".env kept"; fi
   sub "python sidecars (voice, listening, vision)"
