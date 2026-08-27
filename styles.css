@@ -4,29 +4,35 @@
    a measured requirements block). Everything shown is a real capture or a measured number.
 
    Palette — neon, kept minimal:
-     void   #090a0f  the scene's navy pulled to near-black; the page ground
-     panel  #10121a  one step up, for the providers band, code and the footer
+     void   #0a0912  near-black pulled a step toward violet; the page ground
+     panel  #121020  one step up, for the providers band, code and the footer
      fog    white at 6% / 12% / 22% for surfaces and hairlines
      text   #eceef3 / #b1b5c2 / #7d8290
-     neon   #4dff9d  signal green, the color of a terminal cursor — the ONE accent. It glows only where
-                     it points at something (the CTA, the live bar, the free VRAM); text
-                     never glows, it has to stay readable.
-   No gradients, no glass, no second hue. The dark captures sit on the void with a hairline,
-   so the app and the page read as one surface.
+     neon   #b48cff  electric lilac — the ONE accent. It glows only where it points at something
+                     (the CTA, the live bar, the free VRAM, the command box); running text never
+                     glows, it has to stay readable (7.6:1 on the void).
+   Light: two soft radial halos of the accent (behind the hero, behind the closing band) and a
+   glow on the hero frame — ambient light on a dark room, not glass. No gradient fills, no
+   second hue. The dark captures sit on the void with a hairline, so the app and the page read
+   as one surface.
    Type: Fraunces for headings, Inter for everything else. */
 
 :root {
-  --void: #090a0f;
-  --panel: #10121a;
+  --void: #0a0912;
+  --panel: #121020;
   --fog-1: rgba(255, 255, 255, 0.06);
   --fog-2: rgba(255, 255, 255, 0.12);
   --fog-3: rgba(255, 255, 255, 0.22);
   --text: #eceef3;
   --text-2: #b1b5c2;
   --text-3: #7d8290;
-  --neon: #4dff9d;
-  --neon-dim: rgba(77, 255, 157, 0.16);
-  --neon-glow: 0 0 18px rgba(77, 255, 157, 0.35);
+  --neon: #b48cff;
+  --neon-bright: #cbb0ff;
+  --neon-rgb: 180, 140, 255;
+  --neon-dim: rgba(var(--neon-rgb), 0.16);
+  /* layered: a tight core, a soft spill, a wide wash — reads as a light source, not a blur */
+  --neon-glow: 0 0 6px rgba(var(--neon-rgb), 0.55), 0 0 22px rgba(var(--neon-rgb), 0.32), 0 0 56px rgba(var(--neon-rgb), 0.14);
+  --neon-glow-hover: 0 0 8px rgba(var(--neon-rgb), 0.7), 0 0 30px rgba(var(--neon-rgb), 0.45), 0 0 80px rgba(var(--neon-rgb), 0.2);
   --serif: "Fraunces", Georgia, "Times New Roman", serif;
   --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
@@ -69,20 +75,36 @@ p { max-width: 64ch; }
   border: 1px solid var(--neon); transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 .btn-dark { background: var(--neon); color: var(--void); box-shadow: var(--neon-glow); }
-.btn-dark:hover { background: #6dffb0; box-shadow: 0 0 26px rgba(77, 255, 157, 0.5); }
+.btn-dark:hover { background: var(--neon-bright); box-shadow: var(--neon-glow-hover); }
 .btn-lg { padding: 13px 22px; font-size: 16px; }
 .link-arrow { font-weight: 500; text-decoration: none; color: var(--text-2); }
 .link-arrow::after { content: " \2192"; }
 .link-arrow:hover { color: var(--neon); }
 
 /* ── nav ─────────────────────────────────────────────────────────────────── */
-.nav { position: sticky; top: 0; z-index: 10; background: rgba(9, 10, 15, 0.88); backdrop-filter: blur(6px); border-bottom: 1px solid var(--fog-2); }
+.nav { position: sticky; top: 0; z-index: 10; background: rgba(10, 9, 18, 0.88); backdrop-filter: blur(6px); border-bottom: 1px solid var(--fog-2); }
 .nav-inner { display: flex; align-items: center; gap: 32px; height: 60px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; font-family: var(--serif); font-size: 19px; font-weight: 500; text-decoration: none; }
 .brand-mark { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--neon); color: var(--void); font-size: 15px; box-shadow: var(--neon-glow); }
 .nav-links { display: flex; gap: 22px; margin-right: auto; }
 .nav-links a { font-size: 14.5px; color: var(--text-2); text-decoration: none; }
 .nav-links a:hover { color: var(--text); }
+
+/* ── light ───────────────────────────────────────────────────────────────── */
+/* A soft lamp behind the hero and another behind the closing band. Pure radial washes of the
+   accent at low alpha on the void — they light the room, they don't sit on top of anything. */
+.hero, .cta-band { position: relative; isolation: isolate; }
+.hero::before, .cta-band::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 70% at 72% 45%, rgba(var(--neon-rgb), 0.20), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 18% 30%, rgba(var(--neon-rgb), 0.09), transparent 70%);
+}
+.cta-band::before {
+  background: radial-gradient(ellipse 50% 80% at 50% 60%, rgba(var(--neon-rgb), 0.16), transparent 70%);
+}
+/* the hero band bleeds past the wrap, so the halo is not clipped by the 1120px column */
+.hero::before { inset: -40px -20vw -40px -20vw; }
 
 /* ── hero ────────────────────────────────────────────────────────────────── */
 .hero {
@@ -96,6 +118,11 @@ p { max-width: 64ch; }
 .hero-fine { margin-top: 18px; font-size: 13px; color: var(--text-3); }
 .hero-shot { margin: 0; }
 .hero-shot img { border-radius: 12px; border: 1px solid var(--fog-3); }
+/* the frame is lit from behind: a tinted hairline and a wide, faint spill onto the void */
+.hero-shot img, .hero-shot video {
+  border-color: rgba(var(--neon-rgb), 0.35);
+  box-shadow: 0 0 0 1px rgba(var(--neon-rgb), 0.08), 0 0 48px rgba(var(--neon-rgb), 0.22), 0 24px 80px rgba(0, 0, 0, 0.55);
+}
 
 /* ── strip ───────────────────────────────────────────────────────────────── */
 .strip { border-top: 1px solid var(--fog-2); border-bottom: 1px solid var(--fog-2); padding: 22px 0; }
@@ -148,6 +175,8 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
   font-size: 14px; font-weight: 500; background: var(--fog-1);
   display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
 }
+.grid-tiles li { transition: border-color 0.15s, box-shadow 0.15s; }
+.grid-tiles li:hover { border-color: rgba(var(--neon-rgb), 0.45); box-shadow: 0 0 18px rgba(var(--neon-rgb), 0.12); }
 .grid-tiles li span { font-size: 11.5px; font-weight: 600; color: var(--neon); }
 
 /* two columns + transcript */
@@ -161,7 +190,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 /* checks */
 .checks { list-style: none; display: grid; gap: 14px; max-width: 70ch; }
 .checks li { padding-left: 22px; position: relative; color: var(--text-2); font-size: 15px; }
-.checks li::before { content: ""; position: absolute; left: 0; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 10px rgba(77, 255, 157, 0.6); }
+.checks li::before { content: ""; position: absolute; left: 0; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 10px rgba(var(--neon-rgb), 0.7); }
 .checks strong { display: block; color: var(--text); font-weight: 600; margin-bottom: 2px; }
 
 /* ── setup (providers) ───────────────────────────────────────────────────── */
@@ -171,7 +200,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .setup .grid-tiles li { background: var(--void); }
 .settings-shot { position: relative; max-height: 560px; overflow: hidden; border-radius: var(--r); }
 .settings-shot img { width: 100%; }
-.settings-shot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(to bottom, rgba(16, 18, 26, 0), var(--panel)); }
+.settings-shot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(to bottom, rgba(18, 16, 32, 0), var(--panel)); }
 
 /* ── install ─────────────────────────────────────────────────────────────── */
 .install { padding: 80px 0; }
@@ -181,8 +210,11 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .cmd {
   display: flex; align-items: stretch;
   background: #000; color: var(--text);
-  border: 1px solid var(--fog-3); border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(var(--neon-rgb), 0.4); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(var(--neon-rgb), 0.06), 0 0 32px rgba(var(--neon-rgb), 0.16);
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
+.cmd:hover, .cmd:focus-within { border-color: rgba(var(--neon-rgb), 0.7); box-shadow: 0 0 0 1px rgba(var(--neon-rgb), 0.1), 0 0 44px rgba(var(--neon-rgb), 0.28); }
 .cmd-prompt { padding: 16px 0 16px 18px; font-family: var(--mono); color: var(--neon); }
 .cmd code { flex: 1; padding: 16px 14px; background: none; color: inherit; font-size: 15px; white-space: nowrap; overflow-x: auto; border-radius: 0; }
 .copy {
@@ -207,7 +239,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .seg:nth-child(3) { background: #8a8e9c; }
 .seg:nth-child(4) { background: #666a78; }
 .seg:nth-child(5) { background: #4a4e5a; }
-.seg-free { background: var(--neon-dim); color: var(--neon); border-right: 0; box-shadow: inset 0 0 18px rgba(77, 255, 157, 0.18); }
+.seg-free { background: var(--neon-dim); color: var(--neon); border-right: 0; box-shadow: inset 0 0 18px rgba(var(--neon-rgb), 0.22); }
 .vram-total { margin-top: 12px; font-size: 14px; color: var(--text-2); }
 .req { width: 100%; border-collapse: collapse; }
 .req th, .req td { padding: 12px 0; border-top: 1px solid var(--fog-2); text-align: left; vertical-align: top; font-size: 14.5px; }
@@ -263,7 +295,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 
 /* text-style button (the "Watch 30 s" secondary CTA) */
 .link-btn { background: none; border: 0; padding: 0; font: inherit; font-size: 15px; cursor: pointer; }
-.hero-shot video { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--fog-3); background: var(--panel); }
+.hero-shot video { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid rgba(var(--neon-rgb), 0.35); background: var(--panel); }
 
 /* pillars band */
 .pillars-band { border-top: 1px solid var(--fog-2); border-bottom: 1px solid var(--fog-2); padding: 56px 0; }
@@ -315,7 +347,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .letter-sign { font-family: var(--serif); color: var(--text) !important; margin-top: 4px; }
 .letter-links { margin-top: 26px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .btn-ghost { background: transparent; color: var(--neon); }
-.btn-ghost:hover { background: var(--neon-dim); }
+.btn-ghost:hover { background: var(--neon-dim); box-shadow: 0 0 22px rgba(var(--neon-rgb), 0.25); }
 
 /* faq */
 .faq { padding: 72px 0 24px; }
