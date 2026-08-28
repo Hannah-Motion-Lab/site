@@ -216,7 +216,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 }
 .cmd:hover, .cmd:focus-within { border-color: rgba(var(--neon-rgb), 0.7); box-shadow: 0 0 0 1px rgba(var(--neon-rgb), 0.1), 0 0 44px rgba(var(--neon-rgb), 0.28); }
 .cmd-prompt { padding: 16px 0 16px 18px; font-family: var(--mono); color: var(--neon); }
-.cmd code { flex: 1; padding: 16px 14px; background: none; color: inherit; font-size: 15px; white-space: nowrap; overflow-x: auto; border-radius: 0; }
+.cmd code { flex: 1; padding: 16px 14px; background: none; color: inherit; font-size: 14px; white-space: nowrap; overflow-x: auto; border-radius: 0; }
 .copy {
   padding: 0 18px; border: 0; border-left: 1px solid var(--fog-2);
   background: transparent; color: var(--text-2);
