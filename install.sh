@@ -5,7 +5,8 @@
 #
 # What it sets up, in order (each step is skipped if already done, so re-running is safe):
 #   1. system packages (git, node, python, uv, unzip) via your distro's package manager
-#   2. Ollama + the three models Hannah uses (brain, memory embeddings, vision)
+#   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
+#      in your user folder if you say so, or a provider key) — nothing of that runs from here
 #   3. the five repos under ~/Hannah-Motion (workspace, backend, frontend, motion-lab, agent)
 #   4. Node deps for backend/frontend, Python venvs for the sidecars and the gesture model
 #   5. the weights that are not in git: Kokoro voice (from upstream) and the trained
@@ -94,34 +95,10 @@ NVIDIA=""
 if has nvidia-smi && nvidia-smi >/dev/null 2>&1; then NVIDIA=1; sub "NVIDIA GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)"
 else warn "no NVIDIA GPU detected: the voice and gesture models will run on CPU (slower)."; fi
 
-# ── 2. Ollama + models ────────────────────────────────────────────────────────────────
-# HANNAH_BRAIN=cloud: no Ollama, no local models — the brain is a provider (Groq/OpenAI/
-# Anthropic/OpenRouter) whose key you paste in the ⚙ panel; vision and memory recall are off.
-CLOUD=""; [ "${HANNAH_BRAIN:-}" = cloud ] && CLOUD=1
-if [ -n "$CLOUD" ]; then say "brain: cloud provider (skipping Ollama and the local models)"; else
-say "Ollama (the brain)"
-if ! has ollama; then
-  sub "installing Ollama"
-  if [ "${PKG%% *}" = "sudo" ] && [ "$(echo "$PKG" | awk '{print $2}')" = "pacman" ]; then $PKG ollama
-  else fetch_script "https://ollama.com/install.sh" "$tmp/ollama-install.sh" && sh "$tmp/ollama-install.sh"; fi
-fi
-# Ollama is a SYSTEM service, not part of Hannah: it is never bundled, and this script never
-# enrolls it with sudo. If it is already answering (however you run it) it is left alone; if
-# not, it is started for this session only and you are told how to make that permanent.
-if ! curl -sf -m 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
-  sub "starting ollama for this session (no sudo, no service enrolled)"
-  (nohup ollama serve >/dev/null 2>&1 &) || true
-  for _ in $(seq 1 20); do curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break; sleep 1; done
-  curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 || die "ollama did not start. Run 'ollama serve' in another terminal and re-run this installer."
-  warn "to have Ollama start at boot: systemctl --user enable --now ollama   (or: sudo systemctl enable --now ollama)"
-else
-  sub "ollama already running ✓ (left as is)"
-fi
-for m in qwen2.5:7b nomic-embed-text moondream; do
-  if ollama list 2>/dev/null | awk '{print $1}' | grep -qx "$m" ; then sub "$m ✓"
-  else sub "pulling $m"; ollama pull "$m"; fi
-done
-fi
+# ── 2. the brain is NOT installed here ────────────────────────────────────────────────
+# Where Hannah thinks (Ollama on this PC, or a provider key) is chosen on the FIRST RUN, in
+# her window: she detects Ollama if you already have it, installs it in your user folder if
+# you ask, and downloads the models with a progress bar. Nothing of that belongs in a script.
 
 # ── 3. repos ──────────────────────────────────────────────────────────────────────────
 say "repos → $ROOT"
@@ -159,9 +136,6 @@ say "backend"
     # defaults that make it work on the first try: the brain that is best at actions, and
     # the local ASR (the example points at the cloud, which needs an OpenAI key)
     sed -i 's/^LLM_MODEL=.*/LLM_MODEL=qwen2.5:7b/; s/^ASR_PROVIDER=.*/ASR_PROVIDER=local/' .env
-    # cloud brain: Groq's OpenAI-compatible endpoint as the placeholder (switch provider + paste
-    # the key in the ⚙ panel → Brain); no vision model and no local embeddings
-    [ -n "$CLOUD" ] && sed -i 's|^LLM_BASE_URL=.*|LLM_BASE_URL=https://api.groq.com/openai/v1|; s/^LLM_API_KEY=.*/LLM_API_KEY=/; s/^LLM_MODEL=.*/LLM_MODEL=llama-3.3-70b-versatile/; s/^VISION_PROVIDER=.*/VISION_PROVIDER=off/; s/^#\{0,1\}[[:space:]]*MEMORY_RECALL=.*/MEMORY_RECALL=false/' .env
     # the backend<->agent bearer: generated now so the agent is never reachable without it
     tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
     sed -i "s|^#\?[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
@@ -279,7 +253,6 @@ cat <<EOF
       hannah doctor     what works on this desktop and what is missing
       hannah stop       shut everything down and free the GPU
 
-$( [ -n "$CLOUD" ] && printf '  %sCloud brain:%s open the ⚙ panel → Brain, pick your provider and paste the API key. Nothing works until then.\n' "$C_WARN" "$C_OFF" )
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
       TOOLS_ENABLED=true          let her act (internet, open apps, commands)
       TOOLS_SYSTEM_CONTROL=true   a REAL terminal — read the security note first

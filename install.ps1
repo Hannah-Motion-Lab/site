@@ -4,9 +4,10 @@
 #
 # Everything is installed for YOUR user only — nothing touches Program Files or the registry
 # beyond your own PATH:
-#   1. tools as portable copies in %USERPROFILE%\Hannah-Motion\.tools: Git (MinGit), Node 22,
-#      Ollama (CLI zip); uv (Python 3.12) and bun (the agent) in your profile
-#   2. Ollama models: qwen2.5:7b (the brain) and moondream (vision)
+#   1. tools as portable copies in %USERPROFILE%\Hannah-Motion\.tools: Git (MinGit), Node 22;
+#      uv (Python 3.12) and bun (the agent) in your profile
+#   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
+#      per-user if you say so, or a provider key)
 #   3. clones the Hannah repos into %USERPROFILE%\Hannah-Motion
 #   4. backend + voice/listening sidecars on the CPU (the gesture model is Linux/CUDA only)
 #   5. the overlay app from the latest release (per-user install, silent)
@@ -81,40 +82,10 @@ function Install-Hannah {
       Add-UserPath (Join-Path $env:USERPROFILE '.bun\bin')
     } catch { Warn 'bun install failed; the agent will not be available' }
   }
-  # $env:HANNAH_BRAIN='cloud': no Ollama, no local models — the brain is a provider whose key you
-  # paste in the ⚙ panel; vision and memory recall are off.
-  $Cloud = ($env:HANNAH_BRAIN -eq 'cloud')
-  if (-not (Has ollama) -and -not $Cloud) {
-    $ollamaDir = Join-Path $env:LOCALAPPDATA 'Programs\Ollama'
-    if (Has winget) {
-      # the official installer is per-user (no UAC) and keeps itself updated
-      Sub 'Ollama (official installer via winget, per-user)'
-      winget install -e --id Ollama.Ollama --scope user --silent --accept-source-agreements --accept-package-agreements | Out-Null
-      Add-UserPath $ollamaDir
-    }
-    if (-not (Has ollama)) {
-      Sub 'Ollama (portable zip, ~1.4 GB — includes the GPU runtimes)'
-      Fetch 'https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip' "$tmp\ollama.zip"
-      Expand-Archive "$tmp\ollama.zip" -DestinationPath "$Tools\ollama" -Force
-      Add-UserPath "$Tools\ollama"
-    }
-  }
-
-  # ── 2. Ollama + models ──────────────────────────────────────────────────────────────
-  function OllamaUp { try { Invoke-RestMethod 'http://127.0.0.1:11434/api/tags' -TimeoutSec 2 | Out-Null; $true } catch { $false } }
-  if ($Cloud) { Say 'brain: cloud provider (skipping Ollama and the local models)' } else {
-  Say 'Ollama (the brain)'
-  if (-not (OllamaUp)) {
-    Sub 'starting ollama serve'
-    Start-Process -WindowStyle Hidden -FilePath 'ollama' -ArgumentList 'serve'
-    for ($i = 0; $i -lt 20 -and -not (OllamaUp); $i++) { Start-Sleep 1 }
-    if (-not (OllamaUp)) { Die "ollama did not start. Run 'ollama serve' in another window and re-run." }
-  }
-  $have = (& ollama list 2>$null) -join "`n"
-  foreach ($m in 'qwen2.5:7b', 'nomic-embed-text', 'moondream') {
-    if ($have -match [regex]::Escape($m)) { Sub "$m ✓" } else { Sub "pulling $m (this is the long part)"; & ollama pull $m; if ($LASTEXITCODE) { Die "could not pull $m" } }
-  }
-  }
+  # ── 2. the brain is NOT installed here ─────────────────────────────────────────────
+  # Where Hannah thinks (Ollama on this PC, or a provider key) is chosen on the FIRST RUN, in
+  # her window: she detects Ollama if you already have it, installs it per-user if you ask,
+  # and downloads the models with a progress bar.
 
   # ── 3. repos ────────────────────────────────────────────────────────────────────────
   Say "code → $Root"
@@ -140,7 +111,6 @@ function Install-Hannah {
   if (-not (Test-Path '.env')) {
     $envText = Get-Content '.env.example' -Raw
     $envText = $envText -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=qwen2.5:7b' -replace '(?m)^ASR_PROVIDER=.*$', 'ASR_PROVIDER=local' -replace '(?m)^MOTION_ENABLED=.*$', 'MOTION_ENABLED=false'
-    if ($Cloud) { $envText = $envText -replace '(?m)^LLM_BASE_URL=.*$', 'LLM_BASE_URL=https://api.groq.com/openai/v1' -replace '(?m)^LLM_API_KEY=.*$', 'LLM_API_KEY=' -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=llama-3.3-70b-versatile' -replace '(?m)^VISION_PROVIDER=.*$', 'VISION_PROVIDER=off' -replace '(?m)^#?\s*MEMORY_RECALL=.*$', 'MEMORY_RECALL=false' }
     $tok = -join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Maximum 16) })
     $envText = $envText -replace '(?m)^#?\s*HANNAH_AGENT_TOKEN=.*$', "HANNAH_AGENT_TOKEN=$tok"
     Set-Content '.env' $envText -NoNewline
@@ -207,8 +177,8 @@ function Install-Hannah {
   Write-Host '      hannah' -ForegroundColor Yellow
   Write-Host ''
   Write-Host '  Other commands:   hannah doctor   ·   hannah stop'
-  if ($Cloud) { Write-Host ''; Write-Host '  Cloud brain: open the ⚙ panel → Brain, pick your provider and paste the API key. Nothing works until then.' -ForegroundColor Yellow }
   Write-Host ''
+  Write-Host '  Nothing else was installed: no Ollama, no language model — that is her first question.'
   Write-Host '  On Windows the voice runs on the CPU and there is no gesture model (Linux/CUDA only):'
   Write-Host '  the avatar breathes and looks around, but does not gesture while speaking.'
   Write-Host '  SmartScreen may show "Windows protected your PC" the first time: More info → Run anyway.'

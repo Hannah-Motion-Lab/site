@@ -401,5 +401,3 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .os-tab:hover { color: var(--text); }
 .os-tab.is-active { color: var(--neon); border-color: rgba(var(--neon-rgb), 0.45); background: var(--neon-dim); }
 .os-note { margin-top: 10px; font-size: 13.5px; color: var(--text-3); }
-.os-cloud { margin-top: 8px; }
-.os-cloud code { white-space: normal; word-break: break-all; }

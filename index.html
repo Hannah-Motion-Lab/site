@@ -239,7 +239,7 @@
   <section id="install" class="install">
     <div class="wrap install-inner">
       <h2>One command.</h2>
-      <p class="lede">The installer sets up the whole stack in your user folder &mdash; no admin: the model server and models, the voice, the agent, the overlay, and a <code>hannah</code> command to bring it all up. Anything you already have (git, node, uv, bun, ollama) is reused.</p>
+      <p class="lede">The installer sets up Hannah in your user folder &mdash; no admin: the voice, the listening, the overlay, the hands, and a <code>hannah</code> command to bring it all up. It does <em>not</em> install Ollama or a language model: the first time she opens, she asks where she should think.</p>
       <div class="os-tabs" role="tablist" aria-label="Operating system">
         <button class="os-tab is-active" role="tab" aria-selected="true" data-os="linux" type="button">Linux</button>
         <button class="os-tab" role="tab" aria-selected="false" data-os="mac" type="button">macOS</button>
@@ -252,14 +252,11 @@
         <code id="cmd-win" data-os="win" hidden>irm https://hannah-motion-lab.github.io/site/install.ps1 | iex</code>
         <button id="copy" class="copy" type="button" aria-label="Copy install command">Copy</button>
       </div>
-      <p class="os-note" data-os="linux">x86_64 &middot; NVIDIA for the full local stack, or a cloud brain on any machine &middot; the only install with the gesture model (CUDA).</p>
+      <p class="os-note" data-os="linux">x86_64 &middot; the only install with the gesture model (needs an NVIDIA card) &middot; the brain, local or cloud, is her first question.</p>
       <p class="os-note" data-os="mac" hidden>Apple Silicon or Intel &middot; needs <code>git</code> (Xcode Command Line Tools) &middot; voice on the CPU, no gesture model &middot; the overlay app goes to <code>~/Applications</code>, unsigned but de-quarantined for you.</p>
       <p class="os-note" data-os="win" hidden>Windows 10/11 x64, in PowerShell &middot; voice on the CPU, no gesture model &middot; the overlay installs per-user; SmartScreen may ask &ldquo;More info &rarr; Run anyway&rdquo; once.</p>
-      <p class="os-note os-cloud" data-os="linux">Rather not install Ollama (no 4&nbsp;GB model; brain via Groq, OpenAI, Anthropic or OpenRouter)? <code>curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | HANNAH_BRAIN=cloud bash</code> &mdash; then paste your key in the ⚙ panel. Vision stays off.</p>
-      <p class="os-note os-cloud" data-os="mac" hidden>Rather not install Ollama? <code>curl -fsSL https://hannah-motion-lab.github.io/site/install-mac.sh | HANNAH_BRAIN=cloud bash</code> &mdash; then paste your provider key in the ⚙ panel. Vision stays off.</p>
-      <p class="os-note os-cloud" data-os="win" hidden>Rather not install Ollama? <code>$env:HANNAH_BRAIN='cloud'; irm https://hannah-motion-lab.github.io/site/install.ps1 | iex</code> &mdash; then paste your provider key in the ⚙ panel. Vision stays off.</p>
       <ol class="after">
-        <li><code>hannah</code> &mdash; she appears in the corner of your screen</li>
+        <li><code>hannah</code> &mdash; she appears in the corner of your screen and asks where to think: <strong>on this PC</strong> (she installs Ollama in your user folder and downloads the model, if you say so) or <strong>a provider key</strong> (Groq, OpenAI, Anthropic, OpenRouter).</li>
         <li>Say hi. She answers, and moves while she does.</li>
         <li>Try &ldquo;organize my downloads by type&rdquo; and say yes when she asks.</li>
       </ol>
@@ -315,7 +312,7 @@ cat SETUP.md</code></pre>
         <div><dt>Do I need an NVIDIA GPU?</dt><dd>Only for everything local at once. With a cloud brain, the voice on the CPU and vision off, a small NVIDIA card is enough &mdash; the motion model runs on CUDA and is the one part that needs one.</dd></div>
         <div><dt>Does it send my data anywhere?</dt><dd>Not by default: the backend listens on localhost and every model runs on your machine. Only what you deliberately point at a provider leaves it &mdash; a cloud brain, a cloud voice, or the agent&rsquo;s model.</dd></div>
         <div><dt>What does it cost?</dt><dd>Nothing. Hannah is MIT-licensed. If you plug in a cloud provider, they bill you directly &mdash; an agent task on a frontier model is a few cents.</dd></div>
-        <div><dt>Do I have to install Ollama?</dt><dd>No. Add <code>HANNAH_BRAIN=cloud</code> to the install command (see above) and she skips Ollama and the local models; you pick Groq, OpenAI, Anthropic or OpenRouter in the ⚙ panel and paste a key. What you say to her then leaves your machine. Vision and long-term memory recall, which need local models, stay off.</dd></div>
+        <div><dt>Do I have to install Ollama?</dt><dd>No. The installer never touches it. On first launch Hannah asks where she should think: <em>on this PC</em> &mdash; she detects an Ollama you already have, or installs one in your user folder and downloads the model with a progress bar, if you press the button &mdash; or <em>a provider</em> (Groq, OpenAI, Anthropic, OpenRouter) with a key you paste. Vision and long-term memory come with the local brain; with a provider, what you say to her leaves your machine.</dd></div>
         <div><dt>Does it run on Windows or macOS?</dt><dd>Yes, one command each, no admin (see the install section). The voice runs on the CPU there and the gesture model is Linux + NVIDIA only, so she idles and looks around but does not gesture while speaking.</dd></div>
         <div><dt>Can I change how she looks or sounds?</dt><dd>Yes. Her look is a VRM avatar file; her voice is any Kokoro voice (listen before you pick) or an ElevenLabs one. Language follows the voice.</dd></div>
         <div><dt>Can I use a cloud model instead of Ollama?</dt><dd>Any OpenAI-compatible endpoint, from the panel, without a restart: Groq, OpenAI, Anthropic, OpenRouter, or your own server.</dd></div>

@@ -4,8 +4,9 @@
 #   curl -fsSL https://hannah-motion-lab.github.io/site/install-mac.sh | bash
 #
 # What it does, all inside your home folder:
-#   1. tools: Node 22 (private copy), uv (Python 3.12), bun (the agent), Ollama (CLI build)
-#   2. Ollama models: qwen2.5:7b (the brain) and moondream (vision)
+#   1. tools: Node 22 (private copy), uv (Python 3.12), bun (the agent)
+#   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
+#      in your user folder if you say so, or a provider key)
 #   3. clones the Hannah repos into ~/Hannah-Motion
 #   4. backend + voice/listening sidecars on the CPU (no CUDA on macOS → no gesture model;
 #      the avatar keeps its procedural idle)
@@ -78,30 +79,11 @@ if ! has bun; then
   sub "bun (runs the agent)"
   fetch_script "https://bun.sh/install" "$tmp/bun.sh" && bash "$tmp/bun.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"
 fi
-if ! has ollama && [ "${HANNAH_BRAIN:-}" != cloud ]; then
-  sub "Ollama (CLI build, ~160 MB — the .app is not needed)"
-  fetch "https://github.com/ollama/ollama/releases/latest/download/ollama-darwin.tgz" "$tmp/ollama.tgz"
-  mkdir -p "$TOOLS/ollama"; tar -xzf "$tmp/ollama.tgz" -C "$TOOLS/ollama"
-  bin="$(find "$TOOLS/ollama" -type f -name ollama -perm -u+x | head -1)"; [ -n "$bin" ] || die "ollama binary not found in the archive"
-  ln -sf "$bin" "$BIN_DIR/ollama"
-fi
 
-# ── 2. Ollama + models ────────────────────────────────────────────────────────────────
-# HANNAH_BRAIN=cloud: no Ollama, no local models — the brain is a provider whose key you paste
-# in the ⚙ panel; vision and memory recall are off.
-CLOUD=""; [ "${HANNAH_BRAIN:-}" = cloud ] && CLOUD=1
-if [ -n "$CLOUD" ]; then say "brain: cloud provider (skipping Ollama and the local models)"; else
-say "Ollama (the brain)"
-if ! curl -sf -m 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
-  sub "starting ollama serve"
-  (nohup ollama serve >"$HOME/.ollama-hannah.log" 2>&1 &)
-  for _ in $(seq 1 20); do curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break; sleep 1; done
-  curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 || die "ollama did not start. Run 'ollama serve' in another terminal and re-run."
-fi
-for m in qwen2.5:7b nomic-embed-text moondream; do
-  if ollama list 2>/dev/null | grep -q "^$m"; then sub "$m ✓"; else sub "pulling $m (this is the long part)"; ollama pull "$m" || die "could not pull $m"; fi
-done
-fi
+# ── 2. the brain is NOT installed here ────────────────────────────────────────────────
+# Where Hannah thinks (Ollama on this Mac, or a provider key) is chosen on the FIRST RUN, in
+# her window: she detects Ollama if you already have it, installs it in your user folder if
+# you ask, and downloads the models with a progress bar.
 
 # ── 3. repos ──────────────────────────────────────────────────────────────────────────
 say "code → $ROOT"
@@ -126,7 +108,6 @@ say "backend"
     cp .env.example .env
     # local brain + local listening; the gesture model is CUDA-only, so it stays off here
     sed -i '' 's/^LLM_MODEL=.*/LLM_MODEL=qwen2.5:7b/; s/^ASR_PROVIDER=.*/ASR_PROVIDER=local/; s/^MOTION_ENABLED=.*/MOTION_ENABLED=false/' .env
-    [ -n "$CLOUD" ] && sed -i '' 's|^LLM_BASE_URL=.*|LLM_BASE_URL=https://api.groq.com/openai/v1|; s/^LLM_API_KEY=.*/LLM_API_KEY=/; s/^LLM_MODEL=.*/LLM_MODEL=llama-3.3-70b-versatile/; s/^VISION_PROVIDER=.*/VISION_PROVIDER=off/; s/^#\{0,1\}[[:space:]]*MEMORY_RECALL=.*/MEMORY_RECALL=false/' .env
     tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
     sed -i '' "s|^#\{0,1\}[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
     chmod 600 .env
@@ -195,7 +176,7 @@ cat <<EOF
 
   ${C_INFO}Hannah is installed.${C_OFF}   ${C_DIM}($ROOT)${C_OFF}
 
-  Run her (brings up the brain, voice and the overlay):
+  Run her (brings up voice, listening and the overlay; the first time she asks where to think):
 
       ${C_WARN}hannah${C_OFF}
 
@@ -205,8 +186,8 @@ cat <<EOF
 
   On macOS the voice runs on the CPU (a second or two per sentence) and there is no gesture
   model (CUDA only): the avatar breathes and looks around, but does not gesture while speaking.
+  Nothing else was installed: no Ollama, no language model — that is her first question.
 
-$( [ -n "$CLOUD" ] && printf '  %sCloud brain:%s open the ⚙ panel → Brain, pick your provider and paste the API key. Nothing works until then.\n' "$C_WARN" "$C_OFF" )
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
       TOOLS_ENABLED=true          let her act (internet, open apps, commands)
       AGENT_ENABLED=true          multi-step tasks; needs an API key with credits
