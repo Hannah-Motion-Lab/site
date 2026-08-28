@@ -7,7 +7,8 @@
 #   1. system packages (git, node, python, uv, unzip) via your distro's package manager
 #   2. Ollama + the three models Hannah uses (brain, memory embeddings, vision)
 #   3. the five repos under ~/Hannah-Motion (workspace, backend, frontend, motion-lab, agent)
-#   4. Node deps for backend/frontend, Python venvs for the sidecars and the gesture model
+#   4. Node deps for backend/frontend, Python venvs for the sidecars (voice/vision, and the
+#      watch sidecar hannah-sense, which needs its own) and the gesture model
 #   5. the weights that are not in git: Kokoro voice (from upstream) and the trained
 #      text→motion model (from Hannah's GitHub release)
 #   6. bun + the agent (the "hands"), off by default until you add an API key
@@ -164,6 +165,17 @@ say "backend"
     else python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt; fi
   fi
   sub "sidecars ✓"
+  # hannah-sense (:8007, the watches) gets its OWN venv, with --system-site-packages so the
+  # screen and AT-SPI rungs can reach `gi`/`dbus`, which are distro packages. It is NOT the venv
+  # above: that one pins numpy and onnxruntime-gpu for faster-whisper, Kokoro and YOLO, and
+  # letting the system site-packages in would break the voice at runtime and in silence.
+  sub "watch sidecar (hannah-sense)"
+  cd sense
+  if [ ! -x .venv/bin/python ]; then
+    if has uv; then uv venv .venv --python 3.12 --system-site-packages >/dev/null 2>&1 || uv venv .venv --system-site-packages >/dev/null; uv pip install -q -r requirements.txt
+    else python3 -m venv --system-site-packages .venv && .venv/bin/pip install -q -r requirements.txt; fi
+  fi
+  sub "hannah-sense ✓ (off until SENSE_ENABLED=true)"
 )
 say "frontend"
 ( cd "$ROOT/hannah-frontend"
