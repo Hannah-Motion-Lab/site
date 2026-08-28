@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Hannah installer — the WHOLE companion, not just the window.
+# Hannah installer: the WHOLE companion, not just the window.
 #
 #   curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash
 #
 # What it sets up, in order (each step is skipped if already done, so re-running is safe):
 #   1. system packages (git, node, python, uv, unzip) via your distro's package manager
-#   2. Ollama + the three models Hannah uses (brain, memory embeddings, vision)
+#   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
+#      in your user folder if you say so, or a provider key), nothing of that runs from here
 #   3. the five repos under ~/Hannah-Motion (workspace, backend, frontend, motion-lab, agent)
 #   4. Node deps for backend/frontend, Python venvs for the sidecars (voice/vision, and the
 #      watch sidecar hannah-sense, which needs its own) and the gesture model
@@ -16,7 +17,7 @@
 #
 # Why not a single package: the stack is ~20 GB of Python/CUDA environments and models that
 # must be built and downloaded on YOUR machine (GPU-specific wheels, non-redistributable
-# models). The AppImage alone is only the window — it needs all of this behind it.
+# models). The AppImage alone is only the window, it needs all of this behind it.
 set -euo pipefail
 
 ORG="Hannah-Motion-Lab"
@@ -24,6 +25,9 @@ RELEASE_REPO="${ORG}/desktop"
 ROOT="${HANNAH_HOME:-$HOME/Hannah-Motion}"
 BIN_DIR="$HOME/.local/bin"
 API="https://api.github.com/repos/${RELEASE_REPO}/releases/latest"
+# the gesture model's weights (~400 MB, used by the Python motion server, not by the app):
+# a release of their own so the app release only lists apps
+MODELS_API="https://api.github.com/repos/${ORG}/motion-model/releases/tags/models"
 SITE="https://hannah-motion-lab.github.io/site"
 DOCS="https://github.com/${ORG}/workspace#readme"
 KOKORO="https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
@@ -78,7 +82,7 @@ has node || die "node is required (20+)."
 node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' || die "node 20+ is required (found $(node -v))."
 has python3 || die "python3 is required (3.12+)."
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-# third-party installers: to a file first, then run — never `curl | sh` (a cut-off download
+# third-party installers: to a file first, then run, never `curl | sh` (a cut-off download
 # would otherwise run half a script). Their content is whatever the vendor serves today.
 fetch_script() { curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"; }
 # uv creates the venvs far faster than pip; install it to the user if the distro has none.
@@ -92,29 +96,10 @@ NVIDIA=""
 if has nvidia-smi && nvidia-smi >/dev/null 2>&1; then NVIDIA=1; sub "NVIDIA GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)"
 else warn "no NVIDIA GPU detected: the voice and gesture models will run on CPU (slower)."; fi
 
-# ── 2. Ollama + models ────────────────────────────────────────────────────────────────
-say "Ollama (the brain)"
-if ! has ollama; then
-  sub "installing Ollama"
-  if [ "${PKG%% *}" = "sudo" ] && [ "$(echo "$PKG" | awk '{print $2}')" = "pacman" ]; then $PKG ollama
-  else fetch_script "https://ollama.com/install.sh" "$tmp/ollama-install.sh" && sh "$tmp/ollama-install.sh"; fi
-fi
-# Ollama is a SYSTEM service, not part of Hannah: it is never bundled, and this script never
-# enrolls it with sudo. If it is already answering (however you run it) it is left alone; if
-# not, it is started for this session only and you are told how to make that permanent.
-if ! curl -sf -m 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
-  sub "starting ollama for this session (no sudo, no service enrolled)"
-  (nohup ollama serve >/dev/null 2>&1 &) || true
-  for _ in $(seq 1 20); do curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break; sleep 1; done
-  curl -sf -m 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 || die "ollama did not start. Run 'ollama serve' in another terminal and re-run this installer."
-  warn "to have Ollama start at boot: systemctl --user enable --now ollama   (or: sudo systemctl enable --now ollama)"
-else
-  sub "ollama already running ✓ (left as is)"
-fi
-for m in qwen2.5:7b nomic-embed-text moondream; do
-  if ollama list 2>/dev/null | awk '{print $1}' | grep -qx "$m" ; then sub "$m ✓"
-  else sub "pulling $m"; ollama pull "$m"; fi
-done
+# ── 2. the brain is NOT installed here ────────────────────────────────────────────────
+# Where Hannah thinks (Ollama on this PC, or a provider key) is chosen on the FIRST RUN, in
+# her window: she detects Ollama if you already have it, installs it in your user folder if
+# you ask, and downloads the models with a progress bar. Nothing of that belongs in a script.
 
 # ── 3. repos ──────────────────────────────────────────────────────────────────────────
 say "repos → $ROOT"
@@ -189,12 +174,12 @@ say "gesture model (text → motion)"
       # torch must come from the CUDA 12.8 index (RTX 50xx needs it; older GPUs work too)
       if [ -n "$NVIDIA" ]; then uv pip install -q torch --index-url https://download.pytorch.org/whl/cu128
       else uv pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
-      uv pip install -q -r requirements.txt
+      uv pip install -q -r requirements-serve.txt
     else
       python3 -m venv .venv
       if [ -n "$NVIDIA" ]; then .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cu128
       else .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
-      .venv/bin/pip install -q -r requirements.txt
+      .venv/bin/pip install -q -r requirements-serve.txt
     fi
   fi
   sub "motion-lab ✓" )
@@ -202,7 +187,7 @@ say "gesture model (text → motion)"
 # ── 5. weights that are not in git ────────────────────────────────────────────────────
 say "model weights"
 # download to a temp file, verify against SHA256SUMS when the release ships one, then move into
-# place — a half-written file never gets the final name, and a tampered one never gets used.
+# place, a half-written file never gets the final name, and a tampered one never gets used.
 dl() {
   local part="$2.part"
   curl -fL --proto '=https' --tlsv1.2 --progress-bar -o "$part" "$1" || { rm -f "$part"; die "download failed: $1"; }
@@ -210,7 +195,7 @@ dl() {
     local want; want="$(grep -E " [*]?$(basename "$1")\$" "$tmp/SHA256SUMS" | awk '{print $1}' | head -1)"
     if [ -n "$want" ]; then
       local got; got="$(sha256sum "$part" | awk '{print $1}')"
-      [ "$got" = "$want" ] || { rm -f "$part"; die "checksum mismatch for $(basename "$1") — the download is corrupt or tampered; nothing was installed"; }
+      [ "$got" = "$want" ] || { rm -f "$part"; die "checksum mismatch for $(basename "$1"), the download is corrupt or tampered; nothing was installed"; }
     else warn "$(basename "$1") is not listed in SHA256SUMS: installed unverified"; fi
   fi
   mv -f "$part" "$2"
@@ -226,14 +211,22 @@ asset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/release.json" 
 sums="$(asset SHA256SUMS)"
 if [ -n "$sums" ]; then curl -fsSL --proto '=https' --tlsv1.2 -o "$tmp/SHA256SUMS" "$sums" || warn "could not fetch SHA256SUMS: downloads will not be verified"
 else warn "this release ships no SHA256SUMS: downloads will not be verified"; fi
+say "gesture model (weights)"
+code="$(curl -fsSL -o "$tmp/models.json" -w '%{http_code}' "$MODELS_API" 2>/dev/null)" || true
+[ "${code:-000}" = "200" ] || die "could not read the models release (HTTP ${code:-network error}). https://github.com/${ORG}/motion-model/releases"
+masset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/models.json" | head -n1 | sed 's/.*"\(https[^"]*\)"/\1/'; }
+# swap in the models release's own checksums for these downloads
+mv -f "$tmp/SHA256SUMS" "$tmp/SHA256SUMS.app" 2>/dev/null || true
+msums="$(masset SHA256SUMS)"; [ -n "$msums" ] && curl -fsSL -o "$tmp/SHA256SUMS" "$msums" || warn "the models release ships no SHA256SUMS: weights will not be verified"
 ( cd "$ROOT/hannah-motion-lab"
   mkdir -p runs/vae runs/flow
-  [ -f runs/vae/latest.pt ]  || { sub "gesture model: vae (174 MB)";  dl "$(asset motion-vae-latest.pt)"  runs/vae/latest.pt; }
-  [ -f runs/flow/latest.pt ] || { sub "gesture model: flow (213 MB)"; dl "$(asset motion-flow-latest.pt)" runs/flow/latest.pt; }
+  [ -f runs/vae/latest.pt ]  || { sub "gesture model: vae (174 MB)";  dl "$(masset motion-vae-latest.pt)"  runs/vae/latest.pt; }
+  [ -f runs/flow/latest.pt ] || { sub "gesture model: flow (213 MB)"; dl "$(masset motion-flow-latest.pt)" runs/flow/latest.pt; }
   sub "gestures ✓" )
+[ -f "$tmp/SHA256SUMS.app" ] && mv -f "$tmp/SHA256SUMS.app" "$tmp/SHA256SUMS"
 
 # ── 6. the hands (agent) ──────────────────────────────────────────────────────────────
-say "agent (the hands) — off until you add an API key"
+say "agent (the hands), off until you add an API key"
 export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"
 if ! has bun; then sub "installing bun"; fetch_script "https://bun.sh/install" "$tmp/bun-install.sh" && bash "$tmp/bun-install.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"; fi
 if has bun; then
@@ -274,7 +267,7 @@ cat <<EOF
 
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
       TOOLS_ENABLED=true          let her act (internet, open apps, commands)
-      TOOLS_SYSTEM_CONTROL=true   a REAL terminal — read the security note first
+      TOOLS_SYSTEM_CONTROL=true   a REAL terminal, read the security note first
       AGENT_ENABLED=true          multi-step tasks; needs an OpenRouter key with credits
 
   Docs: ${DOCS}

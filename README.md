@@ -1,7 +1,7 @@
-# hannah-site — landing page
+# hannah-site: landing page
 
 One-page site for Hannah, Ollama-style: hero with the copyable install command,
-feature grid, requirements and links to every repo in the org. Plain HTML/CSS/JS —
+feature grid, requirements and links to every repo in the org. Plain HTML/CSS/JS , 
 **no build step, no dependencies, no webfonts**.
 
 Live at **https://hannah-motion-lab.github.io/site/**
@@ -24,7 +24,7 @@ cd hannah-site && python3 -m http.server 8080
 
 ## Deploy
 
-GitHub Pages serves the root of `main` automatically — push and it's live.
+GitHub Pages serves the root of `main` automatically, push and it's live.
 (Enabled once via Settings → Pages → Deploy from branch → `main` / `/root`.)
 
 ## How install.sh works
