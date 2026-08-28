@@ -376,21 +376,6 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
   .tier-table tbody th { width: 84px; }
 }
 
-/* desktop builds (preview) — filled from the GitHub release by main.js; the fallback href is the releases page */
-.builds { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--fog-2); }
-.builds-list { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.builds-list a {
-  display: flex; flex-direction: column; gap: 3px; padding: 11px 14px;
-  border: 1px solid var(--fog-2); border-radius: var(--r); background: var(--fog-1);
-  text-decoration: none; font-size: 14.5px; font-weight: 600; color: var(--text);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.builds-list a span { font-size: 12px; font-weight: 400; color: var(--text-3); }
-.builds-list a:hover { border-color: rgba(var(--neon-rgb), 0.45); box-shadow: 0 0 18px rgba(var(--neon-rgb), 0.12); }
-.builds-list a.is-missing { opacity: 0.55; }
-.builds .src { margin-top: 14px; }
-.builds .src code { white-space: nowrap; }
-@media (max-width: 680px) { .builds-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* OS switcher above the install command — picked by platform on load (main.js) */
 .os-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
@@ -401,3 +386,16 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .os-tab:hover { color: var(--text); }
 .os-tab.is-active { color: var(--neon); border-color: rgba(var(--neon-rgb), 0.45); background: var(--neon-dim); }
 .os-note { margin-top: 10px; font-size: 13.5px; color: var(--text-3); }
+
+/* OS icons in the tabs (inline SVG, monochrome, currentColor) */
+.os-tab { display: inline-flex; align-items: center; gap: 7px; }
+.os-ico { width: 14px; height: 14px; fill: currentColor; flex: none; }
+.os-ico-cut { fill: var(--void); }
+.os-tab.is-active .os-ico-cut { fill: #1a1330; }
+/* "just the window": the raw builds as one quiet line under the command, filled from the release */
+.direct { margin-top: 10px; font-size: 13px; color: var(--text-3); }
+.direct a { color: var(--text-2); text-decoration-color: var(--fog-3); text-underline-offset: 3px; }
+.direct a:hover { color: var(--neon); text-decoration-color: currentColor; }
+.direct-links a + a::before { content: " · "; color: var(--text-3); }
+.direct .ver { color: var(--text-3); }
+.direct code { white-space: nowrap; }

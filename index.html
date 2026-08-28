@@ -41,7 +41,7 @@
       <h1 id="hero-title">An assistant with a voice, a body and hands.</h1>
       <p class="lede">Hannah talks back in real time, moves while she speaks, and does things on your computer &mdash; sorts your downloads, runs a command, finds a file &mdash; asking before anything risky. On your own GPU, or any API you pick.</p>
       <div class="hero-actions">
-        <a class="btn btn-dark btn-lg" href="#install">Install on Linux</a>
+        <a class="btn btn-dark btn-lg cta-install" href="#install">Install</a>
         <button id="watch" class="link-arrow link-btn" type="button">Watch 30&nbsp;s</button>
       </div>
       <p class="hero-fine">Free &middot; MIT &middot; one command &middot; nothing leaves your machine by default</p>
@@ -241,9 +241,9 @@
       <h2>One command.</h2>
       <p class="lede">The installer sets up Hannah in your user folder &mdash; no admin: the voice, the listening, the overlay, the hands, and a <code>hannah</code> command to bring it all up. It does <em>not</em> install Ollama or a language model: the first time she opens, she asks where she should think.</p>
       <div class="os-tabs" role="tablist" aria-label="Operating system">
-        <button class="os-tab is-active" role="tab" aria-selected="true" data-os="linux" type="button">Linux</button>
-        <button class="os-tab" role="tab" aria-selected="false" data-os="mac" type="button">macOS</button>
-        <button class="os-tab" role="tab" aria-selected="false" data-os="win" type="button">Windows</button>
+        <button class="os-tab is-active" role="tab" aria-selected="true" data-os="linux" type="button"><svg class="os-ico" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="10.2" rx="4.1" ry="4.6"/><circle cx="8" cy="4.3" r="2.9"/><ellipse class="os-ico-cut" cx="8" cy="11" rx="2.1" ry="2.8"/><circle class="os-ico-cut" cx="6.9" cy="3.8" r=".6"/><circle class="os-ico-cut" cx="9.1" cy="3.8" r=".6"/><path d="M6.9 5.2h2.2L8 6.4z"/><ellipse cx="5.1" cy="14.3" rx="1.7" ry=".9"/><ellipse cx="10.9" cy="14.3" rx="1.7" ry=".9"/></svg>Linux</button>
+        <button class="os-tab" role="tab" aria-selected="false" data-os="mac" type="button"><svg class="os-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.6 8.5c0-1.6 1.3-2.4 1.4-2.4-.8-1.1-2-1.3-2.4-1.3-1-.1-2 .6-2.5.6s-1.3-.6-2.2-.6C4.8 4.8 3.7 5.5 3.1 6.6c-1.3 2.2-.3 5.5.9 7.3.6.9 1.3 1.9 2.3 1.8.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6 1.6-.9 2.2-1.8c.7-1 1-2 1-2.1-.1 0-2.7-1-2.7-3.3zM9.9 3.9c.5-.6.8-1.4.7-2.2-.7 0-1.6.5-2.1 1.1-.5.5-.9 1.4-.8 2.1.8.1 1.6-.4 2.2-1z"/></svg>macOS</button>
+        <button class="os-tab" role="tab" aria-selected="false" data-os="win" type="button"><svg class="os-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3.1l5.9-.8v5.6H1zM7.6 2.2L15 1.2v6.7H7.6zM1 8.4h5.9V14L1 13.2zM7.6 8.4H15v6.4l-7.4-1z"/></svg>Windows</button>
       </div>
       <div class="cmd" role="group" aria-label="Install command">
         <span class="cmd-prompt" aria-hidden="true">$</span>
@@ -255,6 +255,9 @@
       <p class="os-note" data-os="linux">x86_64 &middot; the only install with the gesture model (needs an NVIDIA card) &middot; the brain, local or cloud, is her first question.</p>
       <p class="os-note" data-os="mac" hidden>Apple Silicon or Intel &middot; needs <code>git</code> (Xcode Command Line Tools) &middot; voice on the CPU, no gesture model &middot; the overlay app goes to <code>~/Applications</code>, unsigned but de-quarantined for you.</p>
       <p class="os-note" data-os="win" hidden>Windows 10/11 x64, in PowerShell &middot; voice on the CPU, no gesture model &middot; the overlay installs per-user; SmartScreen may ask &ldquo;More info &rarr; Run anyway&rdquo; once.</p>
+      <p class="direct" data-os="linux">Just the window, if you set up the stack yourself (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">Setup guide</a>): <span class="direct-links" data-assets="-linux-x86_64.AppImage=AppImage|-linux-amd64.deb=.deb"><a href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">latest release</a></span></p>
+      <p class="direct" data-os="mac" hidden>Just the window, if you set up the stack yourself (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md#macos-and-windows" target="_blank" rel="noopener">Setup guide</a>): <span class="direct-links" data-assets="-mac-arm64.dmg=Apple Silicon .dmg|-mac-x64.dmg=Intel .dmg"><a href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">latest release</a></span> &middot; unsigned: run <code>xattr -dr com.apple.quarantine ~/Applications/Hannah.app</code> once.</p>
+      <p class="direct" data-os="win" hidden>Just the window, if you set up the stack yourself (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md#macos-and-windows" target="_blank" rel="noopener">Setup guide</a>): <span class="direct-links" data-assets="-win-x64.exe=Installer .exe"><a href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">latest release</a></span> &middot; unsigned: SmartScreen &rarr; &ldquo;More info &rarr; Run anyway&rdquo;.</p>
       <ol class="after">
         <li><code>hannah</code> &mdash; she appears in the corner of your screen and asks where to think: <strong>on this PC</strong> (she installs Ollama in your user folder and downloads the model, if you say so) or <strong>a provider key</strong> (Groq, OpenAI, Anthropic, OpenRouter).</li>
         <li>Say hi. She answers, and moves while she does.</li>
@@ -262,19 +265,9 @@
       </ol>
       <dl class="facts facts-row">
         <div><dt>Then</dt><dd><code>hannah doctor</code> checks your desktop &middot; <code>hannah stop</code> frees the GPU</dd></div>
-        <div><dt>Size</dt><dd>~20&nbsp;GB with all models, built and downloaded on your machine</dd></div>
-        <div><dt>Platform</dt><dd>Linux x86_64, macOS, Windows x64 &mdash; one command each, no admin. Gestures are Linux + NVIDIA only.</dd></div>
+        <div><dt>Size</dt><dd>~2&nbsp;GB, plus the brain you pick on first run (4.7&nbsp;GB local, or none with a provider)</dd></div>
+        <div><dt>Platform</dt><dd>Linux x86_64 &middot; macOS 12+ &middot; Windows 10/11 x64 &mdash; one command each, no admin. Gestures are Linux + NVIDIA only.</dd></div>
       </dl>
-      <div class="builds" id="builds" aria-labelledby="builds-title">
-        <p class="sub" id="builds-title">Desktop overlay builds &mdash; preview</p>
-        <ul class="builds-list">
-          <li><a data-asset="-linux-x86_64.AppImage" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">Linux <span>AppImage &middot; x86_64</span></a></li>
-          <li><a data-asset="-mac-arm64.dmg" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">macOS <span>Apple Silicon &middot; dmg</span></a></li>
-          <li><a data-asset="-mac-x64.dmg" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">macOS <span>Intel &middot; dmg</span></a></li>
-          <li><a data-asset="-win-x64.exe" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">Windows <span>installer &middot; x64</span></a></li>
-        </ul>
-        <p class="src">The overlay window on its own, for people who set up the stack by hand (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md#macos-and-windows" target="_blank" rel="noopener">Setup guide</a>) &mdash; the one-command installs above fetch the right one for you. Unsigned: macOS says &ldquo;can&rsquo;t be opened&rdquo; until <code>xattr -dr com.apple.quarantine ~/Applications/Hannah.app</code> (no admin needed); Windows SmartScreen wants &ldquo;More info &rarr; Run anyway&rdquo;.</p>
-      </div>
       <details class="source">
         <summary>Build from source instead</summary>
 <pre><code>git clone https://github.com/Hannah-Motion-Lab/workspace.git Hannah-Motion
@@ -325,7 +318,7 @@ cat SETUP.md</code></pre>
     <div class="wrap cta-inner">
       <h2>Ready when you are.</h2>
       <p class="lede">One command on Linux. Ten minutes and a coffee while the models download.</p>
-      <a class="btn btn-dark btn-lg" href="#install">Install on Linux</a>
+      <a class="btn btn-dark btn-lg cta-install" href="#install">Install</a>
       <p class="hero-fine">Free &middot; MIT &middot; nothing leaves your machine by default</p>
     </div>
   </section>
