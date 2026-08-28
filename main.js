@@ -1,4 +1,4 @@
-// Hannah landing — the little that needs script.
+// Hannah landing: the little that needs script.
 // 1) Copy button for the install command.
 // 2) "Watch 30 s": if the demo video actually loaded, scroll to it and play it with sound;
 //    otherwise just scroll to the hero (the poster is what there is).

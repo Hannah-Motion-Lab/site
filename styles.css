@@ -1,18 +1,18 @@
-/* Hannah — landing.
+/* Hannah: landing.
    Structure: dense and product-led (nav with a CTA, product-in-use hero, a "runs on" strip,
    a sticky index beside data-backed sections, a providers section, a plain install command,
    a measured requirements block). Everything shown is a real capture or a measured number.
 
-   Palette — neon, kept minimal:
+   Palette: neon, kept minimal:
      void   #0a0912  near-black pulled a step toward violet; the page ground
      panel  #121020  one step up, for the providers band, code and the footer
      fog    white at 6% / 12% / 22% for surfaces and hairlines
      text   #eceef3 / #b1b5c2 / #7d8290
-     neon   #b48cff  electric lilac — the ONE accent. It glows only where it points at something
+     neon   #b48cff  electric lilac, the ONE accent. It glows only where it points at something
                      (the CTA, the live bar, the free VRAM, the command box); running text never
                      glows, it has to stay readable (7.6:1 on the void).
    Light: two soft radial halos of the accent (behind the hero, behind the closing band) and a
-   glow on the hero frame — ambient light on a dark room, not glass. No gradient fills, no
+   glow on the hero frame, ambient light on a dark room, not glass. No gradient fills, no
    second hue. The dark captures sit on the void with a hairline, so the app and the page read
    as one surface.
    Type: Fraunces for headings, Inter for everything else. */
@@ -30,7 +30,7 @@
   --neon-bright: #cbb0ff;
   --neon-rgb: 180, 140, 255;
   --neon-dim: rgba(var(--neon-rgb), 0.16);
-  /* layered: a tight core, a soft spill, a wide wash — reads as a light source, not a blur */
+  /* layered: a tight core, a soft spill, a wide wash, reads as a light source, not a blur */
   --neon-glow: 0 0 6px rgba(var(--neon-rgb), 0.55), 0 0 22px rgba(var(--neon-rgb), 0.32), 0 0 56px rgba(var(--neon-rgb), 0.14);
   --neon-glow-hover: 0 0 8px rgba(var(--neon-rgb), 0.7), 0 0 30px rgba(var(--neon-rgb), 0.45), 0 0 80px rgba(var(--neon-rgb), 0.2);
   --serif: "Fraunces", Georgia, "Times New Roman", serif;
@@ -92,7 +92,7 @@ p { max-width: 64ch; }
 
 /* ── light ───────────────────────────────────────────────────────────────── */
 /* A soft lamp behind the hero and another behind the closing band. Pure radial washes of the
-   accent at low alpha on the void — they light the room, they don't sit on top of anything. */
+   accent at low alpha on the void, they light the room, they don't sit on top of anything. */
 .hero, .cta-band { position: relative; isolation: isolate; }
 .hero::before, .cta-band::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
@@ -247,7 +247,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .req th { width: 92px; color: var(--text-3); font-weight: 500; }
 .req td { color: var(--text-2); }
 
-/* VRAM legend — the narrow segments can't hold a label, so the labels live here.
+/* VRAM legend: the narrow segments can't hold a label, so the labels live here.
    Swatch colors come from the .seg scale above via data-seg. */
 .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; color: var(--text-2); }
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
@@ -377,7 +377,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 }
 
 
-/* OS switcher above the install command — picked by platform on load (main.js) */
+/* OS switcher above the install command: picked by platform on load (main.js) */
 .os-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
 .os-tab {
   font: inherit; font-size: 13.5px; font-weight: 500; color: var(--text-3);

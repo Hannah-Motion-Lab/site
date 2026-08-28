@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Hannah installer — the WHOLE companion, not just the window.
+# Hannah installer: the WHOLE companion, not just the window.
 #
 #   curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash
 #
 # What it sets up, in order (each step is skipped if already done, so re-running is safe):
 #   1. system packages (git, node, python, uv, unzip) via your distro's package manager
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
-#      in your user folder if you say so, or a provider key) — nothing of that runs from here
+#      in your user folder if you say so, or a provider key), nothing of that runs from here
 #   3. the five repos under ~/Hannah-Motion (workspace, backend, frontend, motion-lab, agent)
 #   4. Node deps for backend/frontend, Python venvs for the sidecars and the gesture model
 #   5. the weights that are not in git: Kokoro voice (from upstream) and the trained
@@ -16,7 +16,7 @@
 #
 # Why not a single package: the stack is ~20 GB of Python/CUDA environments and models that
 # must be built and downloaded on YOUR machine (GPU-specific wheels, non-redistributable
-# models). The AppImage alone is only the window — it needs all of this behind it.
+# models). The AppImage alone is only the window, it needs all of this behind it.
 set -euo pipefail
 
 ORG="Hannah-Motion-Lab"
@@ -81,7 +81,7 @@ has node || die "node is required (20+)."
 node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' || die "node 20+ is required (found $(node -v))."
 has python3 || die "python3 is required (3.12+)."
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-# third-party installers: to a file first, then run — never `curl | sh` (a cut-off download
+# third-party installers: to a file first, then run, never `curl | sh` (a cut-off download
 # would otherwise run half a script). Their content is whatever the vendor serves today.
 fetch_script() { curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"; }
 # uv creates the venvs far faster than pip; install it to the user if the distro has none.
@@ -175,7 +175,7 @@ say "gesture model (text → motion)"
 # ── 5. weights that are not in git ────────────────────────────────────────────────────
 say "model weights"
 # download to a temp file, verify against SHA256SUMS when the release ships one, then move into
-# place — a half-written file never gets the final name, and a tampered one never gets used.
+# place, a half-written file never gets the final name, and a tampered one never gets used.
 dl() {
   local part="$2.part"
   curl -fL --proto '=https' --tlsv1.2 --progress-bar -o "$part" "$1" || { rm -f "$part"; die "download failed: $1"; }
@@ -183,7 +183,7 @@ dl() {
     local want; want="$(grep -E " [*]?$(basename "$1")\$" "$tmp/SHA256SUMS" | awk '{print $1}' | head -1)"
     if [ -n "$want" ]; then
       local got; got="$(sha256sum "$part" | awk '{print $1}')"
-      [ "$got" = "$want" ] || { rm -f "$part"; die "checksum mismatch for $(basename "$1") — the download is corrupt or tampered; nothing was installed"; }
+      [ "$got" = "$want" ] || { rm -f "$part"; die "checksum mismatch for $(basename "$1"), the download is corrupt or tampered; nothing was installed"; }
     else warn "$(basename "$1") is not listed in SHA256SUMS: installed unverified"; fi
   fi
   mv -f "$part" "$2"
@@ -214,7 +214,7 @@ msums="$(masset SHA256SUMS)"; [ -n "$msums" ] && curl -fsSL -o "$tmp/SHA256SUMS"
 [ -f "$tmp/SHA256SUMS.app" ] && mv -f "$tmp/SHA256SUMS.app" "$tmp/SHA256SUMS"
 
 # ── 6. the hands (agent) ──────────────────────────────────────────────────────────────
-say "agent (the hands) — off until you add an API key"
+say "agent (the hands), off until you add an API key"
 export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"
 if ! has bun; then sub "installing bun"; fetch_script "https://bun.sh/install" "$tmp/bun-install.sh" && bash "$tmp/bun-install.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"; fi
 if has bun; then
@@ -255,7 +255,7 @@ cat <<EOF
 
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
       TOOLS_ENABLED=true          let her act (internet, open apps, commands)
-      TOOLS_SYSTEM_CONTROL=true   a REAL terminal — read the security note first
+      TOOLS_SYSTEM_CONTROL=true   a REAL terminal, read the security note first
       AGENT_ENABLED=true          multi-step tasks; needs an OpenRouter key with credits
 
   Docs: ${DOCS}

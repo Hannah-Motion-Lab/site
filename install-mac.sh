@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hannah — one-command install for macOS (Apple Silicon or Intel). No admin needed.
+# Hannah: one-command install for macOS (Apple Silicon or Intel). No admin needed.
 #
 #   curl -fsSL https://hannah-motion-lab.github.io/site/install-mac.sh | bash
 #
@@ -9,11 +9,11 @@
 #      in your user folder if you say so, or a provider key)
 #   3. clones the Hannah repos into ~/Hannah-Motion
 #   4. backend + voice/listening sidecars on the CPU, and the gesture model (text → motion) on
-#      Apple's GPU (MPS) or the CPU — slower than CUDA, but she moves while she speaks
+#      Apple's GPU (MPS) or the CPU, slower than CUDA, but she moves while she speaks
 #   5. the overlay app from the latest release (unsigned: the quarantine flag is removed)
 #   6. a `hannah` command on your PATH: `hannah` brings everything up and opens the window,
 #      `hannah stop` shuts it down, `hannah doctor` tells you what is running.
-# Needs: git (Xcode Command Line Tools — the ONE thing that may ask an admin) and curl.
+# Needs: git (Xcode Command Line Tools, the ONE thing that may ask an admin) and curl.
 set -u
 
 ORG="Hannah-Motion-Lab"
@@ -114,7 +114,7 @@ say "backend"
     chmod 600 .env
     sub ".env created (edit it to enable tools/terminal/agent)"
   else sub ".env kept"; fi
-  sub "python sidecars (voice, listening) — CPU"
+  sub "python sidecars (voice, listening), CPU"
   cd sidecar
   if [ ! -x .venv/bin/python ]; then
     uv venv .venv --python 3.12 >/dev/null || die "uv could not create the venv"
@@ -138,7 +138,7 @@ code="$(curl -fsSL -o "$tmp/models.json" -w '%{http_code}' "$MODELS_API" 2>/dev/
 [ "${code:-000}" = "200" ] || die "could not read the models release (HTTP ${code:-network error})."
 masset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/models.json" | head -n1 | sed 's/.*"\(https[^"]*\)"/\1/'; }
 msums="$(masset SHA256SUMS)"; [ -n "$msums" ] && curl -fsSL -o "$tmp/models.sums" "$msums" || warn "the models release ships no SHA256SUMS: weights will not be verified"
-dlw() {  # url, dest — verified against the models release's SHA256SUMS
+dlw() {  # url, dest, verified against the models release's SHA256SUMS
   fetch "$1" "$2.part"
   if [ -s "$tmp/models.sums" ]; then
     want="$(grep -E " [*]?$(basename "$1")\$" "$tmp/models.sums" | awk '{print $1}' | head -1)"
@@ -159,7 +159,7 @@ say "voice model"
   sub "voice ✓" )
 
 # ── 5. the hands (agent) ──────────────────────────────────────────────────────────────
-say "agent (the hands) — off until you add an API key"
+say "agent (the hands), off until you add an API key"
 if has bun; then
   ( cd "$ROOT/hannah-agent"
     [ -d node_modules ] || bun install >/dev/null 2>&1
@@ -181,7 +181,7 @@ else
   if [ -n "$sums" ] && curl -fsSL -o "$tmp/SHA256SUMS" "$sums"; then
     want="$(grep -E " [*]?$(basename "$url")\$" "$tmp/SHA256SUMS" | awk '{print $1}' | head -1)"
     got="$(shasum -a 256 "$tmp/Hannah.dmg" | awk '{print $1}')"
-    [ -z "$want" ] || [ "$got" = "$want" ] || die "checksum mismatch for $(basename "$url") — nothing was installed"
+    [ -z "$want" ] || [ "$got" = "$want" ] || die "checksum mismatch for $(basename "$url"), nothing was installed"
   else warn "no SHA256SUMS: the app was not verified"; fi
   mnt="$tmp/dmg"; mkdir -p "$mnt"
   hdiutil attach -nobrowse -quiet -mountpoint "$mnt" "$tmp/Hannah.dmg" || die "could not mount the dmg"
@@ -216,7 +216,7 @@ cat <<EOF
 
   On macOS the voice runs on the CPU and the gestures on Apple's GPU (MPS) or the CPU: each
   sentence takes a bit longer to prepare than with an NVIDIA card, but she moves while she speaks.
-  Nothing else was installed: no Ollama, no language model — that is her first question.
+  Nothing else was installed: no Ollama, no language model, that is her first question.
 
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
       TOOLS_ENABLED=true          let her act (internet, open apps, commands)

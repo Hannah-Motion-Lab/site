@@ -1,8 +1,8 @@
-# Hannah — one-command install for Windows 10/11 (x64). No admin needed.
+# Hannah: one-command install for Windows 10/11 (x64). No admin needed.
 #
 #   irm https://hannah-motion-lab.github.io/site/install.ps1 | iex
 #
-# Everything is installed for YOUR user only — nothing touches Program Files or the registry
+# Everything is installed for YOUR user only, nothing touches Program Files or the registry
 # beyond your own PATH:
 #   1. tools as portable copies in %USERPROFILE%\Hannah-Motion\.tools: Git (MinGit), Node 22;
 #      uv (Python 3.12) and bun (the agent) in your profile
@@ -118,7 +118,7 @@ function Install-Hannah {
     Set-Content '.env' $envText -NoNewline
     Sub '.env created (edit it to enable tools/terminal/agent)'
   } else { Sub '.env kept' }
-  Sub 'python sidecars (voice, listening) — CPU'
+  Sub 'python sidecars (voice, listening), CPU'
   Push-Location 'sidecar'
   if (-not (Test-Path '.venv\Scripts\python.exe')) {
     uv venv .venv --python 3.12 | Out-Null; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'uv could not create the venv' }
@@ -169,7 +169,7 @@ function Install-Hannah {
   Pop-Location
 
   # ── 5. the hands (agent) ────────────────────────────────────────────────────────────
-  Say 'agent (the hands) — off until you add an API key'
+  Say 'agent (the hands), off until you add an API key'
   if (Has bun) {
     Push-Location (Join-Path $Root 'hannah-agent')
     if (-not (Test-Path 'node_modules')) { bun install 2>$null | Out-Null }
@@ -192,7 +192,7 @@ function Install-Hannah {
     if ($sums) {
       $want = ((Invoke-WebRequest $sums.browser_download_url -UseBasicParsing).Content -split "`n" | Where-Object { $_ -match [regex]::Escape($asset.name) + '$' } | Select-Object -First 1) -split '\s+' | Select-Object -First 1
       $got = (Get-FileHash "$tmp\HannahSetup.exe" -Algorithm SHA256).Hash.ToLower()
-      if ($want -and $got -ne $want.ToLower()) { Die "checksum mismatch for $($asset.name) — nothing was installed" }
+      if ($want -and $got -ne $want.ToLower()) { Die "checksum mismatch for $($asset.name), nothing was installed" }
     } else { Warn 'no SHA256SUMS: the app was not verified' }
     # NSIS one-click, per-user (no UAC): lands in %LOCALAPPDATA%\Programs\Hannah
     Start-Process -Wait -FilePath "$tmp\HannahSetup.exe" -ArgumentList '/S'
@@ -213,7 +213,7 @@ function Install-Hannah {
   Write-Host ''
   Write-Host '  Other commands:   hannah doctor   ·   hannah stop'
   Write-Host ''
-  Write-Host '  Nothing else was installed: no Ollama, no language model — that is her first question.'
+  Write-Host '  Nothing else was installed: no Ollama, no language model, that is her first question.'
   Write-Host '  Voice and listening run on the CPU; the gestures on your NVIDIA card if there is one, else on the CPU'
   Write-Host '  (each sentence takes a bit longer to prepare, but she moves while she speaks).'
   Write-Host '  SmartScreen may show "Windows protected your PC" the first time: More info → Run anyway.'
