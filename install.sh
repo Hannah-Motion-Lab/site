@@ -95,6 +95,10 @@ if has nvidia-smi && nvidia-smi >/dev/null 2>&1; then NVIDIA=1; sub "NVIDIA GPU:
 else warn "no NVIDIA GPU detected: the voice and gesture models will run on CPU (slower)."; fi
 
 # ── 2. Ollama + models ────────────────────────────────────────────────────────────────
+# HANNAH_BRAIN=cloud: no Ollama, no local models — the brain is a provider (Groq/OpenAI/
+# Anthropic/OpenRouter) whose key you paste in the ⚙ panel; vision and memory recall are off.
+CLOUD=""; [ "${HANNAH_BRAIN:-}" = cloud ] && CLOUD=1
+if [ -n "$CLOUD" ]; then say "brain: cloud provider (skipping Ollama and the local models)"; else
 say "Ollama (the brain)"
 if ! has ollama; then
   sub "installing Ollama"
@@ -117,6 +121,7 @@ for m in qwen2.5:7b nomic-embed-text moondream; do
   if ollama list 2>/dev/null | awk '{print $1}' | grep -qx "$m" ; then sub "$m ✓"
   else sub "pulling $m"; ollama pull "$m"; fi
 done
+fi
 
 # ── 3. repos ──────────────────────────────────────────────────────────────────────────
 say "repos → $ROOT"
@@ -154,6 +159,9 @@ say "backend"
     # defaults that make it work on the first try: the brain that is best at actions, and
     # the local ASR (the example points at the cloud, which needs an OpenAI key)
     sed -i 's/^LLM_MODEL=.*/LLM_MODEL=qwen2.5:7b/; s/^ASR_PROVIDER=.*/ASR_PROVIDER=local/' .env
+    # cloud brain: Groq's OpenAI-compatible endpoint as the placeholder (switch provider + paste
+    # the key in the ⚙ panel → Brain); no vision model and no local embeddings
+    [ -n "$CLOUD" ] && sed -i 's|^LLM_BASE_URL=.*|LLM_BASE_URL=https://api.groq.com/openai/v1|; s/^LLM_API_KEY=.*/LLM_API_KEY=/; s/^LLM_MODEL=.*/LLM_MODEL=llama-3.3-70b-versatile/; s/^VISION_PROVIDER=.*/VISION_PROVIDER=off/; s/^#\{0,1\}[[:space:]]*MEMORY_RECALL=.*/MEMORY_RECALL=false/' .env
     # the backend<->agent bearer: generated now so the agent is never reachable without it
     tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
     sed -i "s|^#\?[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
@@ -271,6 +279,7 @@ cat <<EOF
       hannah doctor     what works on this desktop and what is missing
       hannah stop       shut everything down and free the GPU
 
+$( [ -n "$CLOUD" ] && printf '  %sCloud brain:%s open the ⚙ panel → Brain, pick your provider and paste the API key. Nothing works until then.\n' "$C_WARN" "$C_OFF" )
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
       TOOLS_ENABLED=true          let her act (internet, open apps, commands)
       TOOLS_SYSTEM_CONTROL=true   a REAL terminal — read the security note first
