@@ -194,7 +194,7 @@
             <tr><th scope="col"></th><th scope="col">Everything local</th><th scope="col">Light</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row">Brain</th><td>Ollama, <code>qwen2.5:7b</code> &middot; 4.8&nbsp;GB VRAM</td><td>Any API: Groq, OpenAI, Anthropic, OpenRouter &middot; 0&nbsp;VRAM</td></tr>
+            <tr><th scope="row">Brain</th><td>Ollama, <code>qwen2.5:7b</code> &middot; 4.8&nbsp;GB VRAM</td><td>Any API: Groq, OpenAI, Anthropic, Google, OpenRouter &middot; 0&nbsp;VRAM</td></tr>
             <tr><th scope="row">Voice</th><td>Kokoro on the GPU &middot; 0.9&nbsp;GB</td><td>Kokoro on the CPU (slower), or ElevenLabs</td></tr>
             <tr><th scope="row">Listening</th><td>Whisper, local &middot; 0.8&nbsp;GB</td><td>Cloud transcription</td></tr>
             <tr><th scope="row">Vision</th><td>moondream, loaded only while the camera is on &middot; 2.4&nbsp;GB</td><td>Off</td></tr>
@@ -227,7 +227,7 @@
         <h2>Yours to change.</h2>
         <p>Three decisions in the panel (the brain, the voice, the hands) and everything technical folded under Advanced. Point her at any OpenAI-compatible endpoint, listen to a voice before you pick it, paste a key once. No restart, and keys never come back to the browser.</p>
         <ul class="grid-tiles">
-          <li>Ollama <span>local</span></li><li>OpenRouter</li><li>Groq</li><li>OpenAI</li><li>Anthropic</li><li>ElevenLabs <span>voice</span></li>
+          <li>Ollama <span>local</span></li><li>OpenRouter</li><li>Groq</li><li>OpenAI</li><li>Anthropic</li><li>Google (Gemini)</li><li>ElevenLabs <span>voice</span></li>
         </ul>
         <p class="src">Teach her new skills with a markdown file: a description, one action, and the phrases that trigger it. Her look is a VRM model; her voice is any Kokoro or ElevenLabs voice.</p>
       </div>
@@ -256,7 +256,7 @@
       <p class="os-note" data-os="mac" hidden>Apple Silicon or Intel &middot; needs <code>git</code> (Xcode Command Line Tools) &middot; gestures on Apple's GPU, voice on the CPU &middot; the overlay app goes to <code>~/Applications</code>, unsigned but de-quarantined for you.</p>
       <p class="os-note" data-os="win" hidden>Windows 10/11 x64, in PowerShell &middot; gestures on your NVIDIA card if there is one, else on the CPU &middot; the overlay installs per-user; SmartScreen may ask "More info &rarr; Run anyway" once.</p>
       <ol class="after">
-        <li><code>hannah</code>: she appears in the corner of your screen and asks where to think: <strong>on this PC</strong> (she installs Ollama in your user folder and downloads the model, if you say so) or <strong>a provider key</strong> (Groq, OpenAI, Anthropic, OpenRouter).</li>
+        <li><code>hannah</code>: she appears in the corner of your screen and asks where to think: <strong>on this PC</strong> (she installs Ollama in your user folder and downloads the model, if you say so) or <strong>a provider key</strong> (Groq, OpenAI, Anthropic, Google Gemini, OpenRouter).</li>
         <li>Say hi. She answers, and moves while she does.</li>
         <li>Try "organize my downloads by type" and say yes when she asks.</li>
       </ol>
@@ -302,7 +302,7 @@ cat SETUP.md</code></pre>
         <div><dt>Do I need an NVIDIA GPU?</dt><dd>Only for everything local at once. With a cloud brain, the voice on the CPU and vision off, a small NVIDIA card is enough. Without any, the gestures are computed on the CPU, slower.</dd></div>
         <div><dt>Does it send my data anywhere?</dt><dd>Not by default: the backend listens on localhost and every model runs on your machine. Only what you deliberately point at a provider leaves it: a cloud brain, a cloud voice, or the agent's model.</dd></div>
         <div><dt>What does it cost?</dt><dd>Nothing. Hannah is MIT-licensed. If you plug in a cloud provider, they bill you directly; an agent task on a frontier model is a few cents.</dd></div>
-        <div><dt>Do I have to install Ollama?</dt><dd>No. The installer never touches it. On first launch Hannah asks where she should think: <em>on this PC</em> (she detects an Ollama you already have, or installs one in your user folder and downloads the model with a progress bar, if you press the button) or <em>a provider</em> (Groq, OpenAI, Anthropic, OpenRouter) with a key you paste. Vision and long-term memory come with the local brain; with a provider, what you say to her leaves your machine.</dd></div>
+        <div><dt>Do I have to install Ollama?</dt><dd>No. The installer never touches it. On first launch Hannah asks where she should think: <em>on this PC</em> (she detects an Ollama you already have, or installs one in your user folder and downloads the model with a progress bar, if you press the button) or <em>a provider</em> (Groq, OpenAI, Anthropic, Google Gemini, OpenRouter) with a key you paste. Vision and long-term memory come with the local brain; with a provider, what you say to her leaves your machine.</dd></div>
         <div><dt>Does it run on Windows or macOS?</dt><dd>Yes, one command each, no admin (see the install section). Everything runs there too: the gestures use Apple's GPU on a Mac, or an NVIDIA card on Windows, and fall back to the CPU otherwise; each sentence takes a bit longer to prepare, but she moves while she speaks.</dd></div>
         <div><dt>Can I change how she looks or sounds?</dt><dd>Yes. Her look is a VRM avatar file; her voice is any Kokoro voice (listen before you pick) or an ElevenLabs one. Language follows the voice.</dd></div>
         <div><dt>Can I use a cloud model instead of Ollama?</dt><dd>Any OpenAI-compatible endpoint, from the panel, without a restart: Groq, OpenAI, Anthropic, OpenRouter, or your own server.</dd></div>
