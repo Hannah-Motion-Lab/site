@@ -239,12 +239,22 @@
   <section id="install" class="install">
     <div class="wrap install-inner">
       <h2>One command.</h2>
-      <p class="lede">The installer sets up the whole stack on your machine: the model server and models, the voice, the gesture model, the agent, the overlay, and a <code>hannah</code> command to bring it all up.</p>
+      <p class="lede">The installer sets up the whole stack in your user folder &mdash; no admin: the model server and models, the voice, the agent, the overlay, and a <code>hannah</code> command to bring it all up. Anything you already have (git, node, uv, bun, ollama) is reused.</p>
+      <div class="os-tabs" role="tablist" aria-label="Operating system">
+        <button class="os-tab is-active" role="tab" aria-selected="true" data-os="linux" type="button">Linux</button>
+        <button class="os-tab" role="tab" aria-selected="false" data-os="mac" type="button">macOS</button>
+        <button class="os-tab" role="tab" aria-selected="false" data-os="win" type="button">Windows</button>
+      </div>
       <div class="cmd" role="group" aria-label="Install command">
         <span class="cmd-prompt" aria-hidden="true">$</span>
-        <code id="cmd-linux">curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash</code>
+        <code id="cmd-linux" data-os="linux">curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash</code>
+        <code id="cmd-mac" data-os="mac" hidden>curl -fsSL https://hannah-motion-lab.github.io/site/install-mac.sh | bash</code>
+        <code id="cmd-win" data-os="win" hidden>irm https://hannah-motion-lab.github.io/site/install.ps1 | iex</code>
         <button id="copy" class="copy" type="button" aria-label="Copy install command">Copy</button>
       </div>
+      <p class="os-note" data-os="linux">x86_64 &middot; NVIDIA for the full local stack, or a cloud brain on any machine &middot; the only install with the gesture model (CUDA).</p>
+      <p class="os-note" data-os="mac" hidden>Apple Silicon or Intel &middot; needs <code>git</code> (Xcode Command Line Tools) &middot; voice on the CPU, no gesture model &middot; the overlay app goes to <code>~/Applications</code>, unsigned but de-quarantined for you.</p>
+      <p class="os-note" data-os="win" hidden>Windows 10/11 x64, in PowerShell &middot; voice on the CPU, no gesture model &middot; the overlay installs per-user; SmartScreen may ask &ldquo;More info &rarr; Run anyway&rdquo; once.</p>
       <ol class="after">
         <li><code>hannah</code> &mdash; she appears in the corner of your screen</li>
         <li>Say hi. She answers, and moves while she does.</li>
@@ -253,7 +263,7 @@
       <dl class="facts facts-row">
         <div><dt>Then</dt><dd><code>hannah doctor</code> checks your desktop &middot; <code>hannah stop</code> frees the GPU</dd></div>
         <div><dt>Size</dt><dd>~20&nbsp;GB with all models, built and downloaded on your machine</dd></div>
-        <div><dt>Platform</dt><dd>Linux x86_64 for the one-command install. macOS and Windows: overlay builds below, stack by hand.</dd></div>
+        <div><dt>Platform</dt><dd>Linux x86_64, macOS, Windows x64 &mdash; one command each, no admin. Gestures are Linux + NVIDIA only.</dd></div>
       </dl>
       <div class="builds" id="builds" aria-labelledby="builds-title">
         <p class="sub" id="builds-title">Desktop overlay builds &mdash; preview</p>
@@ -263,7 +273,7 @@
           <li><a data-asset="-mac-x64.dmg" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">macOS <span>Intel &middot; dmg</span></a></li>
           <li><a data-asset="-win-x64.exe" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">Windows <span>installer &middot; x64</span></a></li>
         </ul>
-        <p class="src">The overlay window only: on macOS and Windows the brain, voice and hands are still set up by hand (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md#macos-and-windows" target="_blank" rel="noopener">Setup guide</a>), and the gesture model needs an NVIDIA card. The builds are unsigned: macOS says &ldquo;can&rsquo;t be opened&rdquo; until you run <code>xattr -dr com.apple.quarantine ~/Applications/Hannah.app</code> (no admin needed); Windows SmartScreen wants &ldquo;More info &rarr; Run anyway&rdquo;.</p>
+        <p class="src">The overlay window on its own, for people who set up the stack by hand (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md#macos-and-windows" target="_blank" rel="noopener">Setup guide</a>) &mdash; the one-command installs above fetch the right one for you. Unsigned: macOS says &ldquo;can&rsquo;t be opened&rdquo; until <code>xattr -dr com.apple.quarantine ~/Applications/Hannah.app</code> (no admin needed); Windows SmartScreen wants &ldquo;More info &rarr; Run anyway&rdquo;.</p>
       </div>
       <details class="source">
         <summary>Build from source instead</summary>
@@ -302,7 +312,7 @@ cat SETUP.md</code></pre>
         <div><dt>Do I need an NVIDIA GPU?</dt><dd>Only for everything local at once. With a cloud brain, the voice on the CPU and vision off, a small NVIDIA card is enough &mdash; the motion model runs on CUDA and is the one part that needs one.</dd></div>
         <div><dt>Does it send my data anywhere?</dt><dd>Not by default: the backend listens on localhost and every model runs on your machine. Only what you deliberately point at a provider leaves it &mdash; a cloud brain, a cloud voice, or the agent&rsquo;s model.</dd></div>
         <div><dt>What does it cost?</dt><dd>Nothing. Hannah is MIT-licensed. If you plug in a cloud provider, they bill you directly &mdash; an agent task on a frontier model is a few cents.</dd></div>
-        <div><dt>Does it run on Windows or macOS?</dt><dd>The overlay does &mdash; preview builds are in the install section. The rest of the stack (brain, voice, hands) is a manual setup there for now, and gestures need an NVIDIA card. Linux x86_64 is what the one-command install covers.</dd></div>
+        <div><dt>Does it run on Windows or macOS?</dt><dd>Yes, one command each, no admin (see the install section). The voice runs on the CPU there and the gesture model is Linux + NVIDIA only, so she idles and looks around but does not gesture while speaking.</dd></div>
         <div><dt>Can I change how she looks or sounds?</dt><dd>Yes. Her look is a VRM avatar file; her voice is any Kokoro voice (listen before you pick) or an ElevenLabs one. Language follows the voice.</dd></div>
         <div><dt>Can I use a cloud model instead of Ollama?</dt><dd>Any OpenAI-compatible endpoint, from the panel, without a restart: Groq, OpenAI, Anthropic, OpenRouter, or your own server.</dd></div>
       </dl>

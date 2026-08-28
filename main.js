@@ -6,12 +6,26 @@
 //    asked their OS for less motion.
 
 (function () {
-  const copyPairs = [['copy', 'cmd-linux']];
-  for (const [btnId, codeId] of copyPairs) {
-    const btn = document.getElementById(btnId);
-    const code = document.getElementById(codeId);
-    if (!btn || !code) continue;
+  // 0) OS switcher: one command box, three commands; the visitor's platform is preselected.
+  const tabs = document.querySelectorAll('.os-tab');
+  const prompt = document.querySelector('.cmd-prompt');
+  const selectOs = (os) => {
+    for (const t of tabs) { const on = t.dataset.os === os; t.classList.toggle('is-active', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); }
+    for (const el of document.querySelectorAll('[data-os]:not(.os-tab)')) el.hidden = el.dataset.os !== os;
+    if (prompt) prompt.textContent = os === 'win' ? '>' : '$';
+  };
+  if (tabs.length) {
+    for (const t of tabs) t.addEventListener('click', () => selectOs(t.dataset.os));
+    const ua = navigator.userAgent || '';
+    selectOs(/Windows/i.test(ua) ? 'win' : /Mac/i.test(ua) && !/iPhone|iPad/i.test(ua) ? 'mac' : 'linux');
+  }
+
+  // 1) Copy: whichever command is visible.
+  const btn = document.getElementById('copy');
+  if (btn) {
     btn.addEventListener('click', async () => {
+      const code = document.querySelector('.cmd code:not([hidden])');
+      if (!code) return;
       try {
         await navigator.clipboard.writeText(code.textContent.trim());
         btn.textContent = 'Copied';

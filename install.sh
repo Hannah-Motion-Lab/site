@@ -23,6 +23,9 @@ RELEASE_REPO="${ORG}/desktop"
 ROOT="${HANNAH_HOME:-$HOME/Hannah-Motion}"
 BIN_DIR="$HOME/.local/bin"
 API="https://api.github.com/repos/${RELEASE_REPO}/releases/latest"
+# the gesture model's weights (~400 MB, used by the Python motion server, not by the app):
+# a release of their own so the app release only lists apps
+MODELS_API="https://api.github.com/repos/${ORG}/motion-model/releases/tags/models"
 SITE="https://hannah-motion-lab.github.io/site"
 DOCS="https://github.com/${ORG}/workspace#readme"
 KOKORO="https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
@@ -214,11 +217,19 @@ asset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/release.json" 
 sums="$(asset SHA256SUMS)"
 if [ -n "$sums" ]; then curl -fsSL --proto '=https' --tlsv1.2 -o "$tmp/SHA256SUMS" "$sums" || warn "could not fetch SHA256SUMS: downloads will not be verified"
 else warn "this release ships no SHA256SUMS: downloads will not be verified"; fi
+say "gesture model (weights)"
+code="$(curl -fsSL -o "$tmp/models.json" -w '%{http_code}' "$MODELS_API" 2>/dev/null)" || true
+[ "${code:-000}" = "200" ] || die "could not read the models release (HTTP ${code:-network error}). https://github.com/${ORG}/motion-model/releases"
+masset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/models.json" | head -n1 | sed 's/.*"\(https[^"]*\)"/\1/'; }
+# swap in the models release's own checksums for these downloads
+mv -f "$tmp/SHA256SUMS" "$tmp/SHA256SUMS.app" 2>/dev/null || true
+msums="$(masset SHA256SUMS)"; [ -n "$msums" ] && curl -fsSL -o "$tmp/SHA256SUMS" "$msums" || warn "the models release ships no SHA256SUMS: weights will not be verified"
 ( cd "$ROOT/hannah-motion-lab"
   mkdir -p runs/vae runs/flow
-  [ -f runs/vae/latest.pt ]  || { sub "gesture model: vae (174 MB)";  dl "$(asset motion-vae-latest.pt)"  runs/vae/latest.pt; }
-  [ -f runs/flow/latest.pt ] || { sub "gesture model: flow (213 MB)"; dl "$(asset motion-flow-latest.pt)" runs/flow/latest.pt; }
+  [ -f runs/vae/latest.pt ]  || { sub "gesture model: vae (174 MB)";  dl "$(masset motion-vae-latest.pt)"  runs/vae/latest.pt; }
+  [ -f runs/flow/latest.pt ] || { sub "gesture model: flow (213 MB)"; dl "$(masset motion-flow-latest.pt)" runs/flow/latest.pt; }
   sub "gestures ✓" )
+[ -f "$tmp/SHA256SUMS.app" ] && mv -f "$tmp/SHA256SUMS.app" "$tmp/SHA256SUMS"
 
 # ── 6. the hands (agent) ──────────────────────────────────────────────────────────────
 say "agent (the hands) — off until you add an API key"
