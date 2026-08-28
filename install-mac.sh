@@ -8,8 +8,8 @@
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      in your user folder if you say so, or a provider key)
 #   3. clones the Hannah repos into ~/Hannah-Motion
-#   4. backend + voice/listening sidecars on the CPU (no CUDA on macOS → no gesture model;
-#      the avatar keeps its procedural idle)
+#   4. backend + voice/listening sidecars on the CPU, and the gesture model (text → motion) on
+#      Apple's GPU (MPS) or the CPU — slower than CUDA, but she moves while she speaks
 #   5. the overlay app from the latest release (unsigned: the quarantine flag is removed)
 #   6. a `hannah` command on your PATH: `hannah` brings everything up and opens the window,
 #      `hannah stop` shuts it down, `hannah doctor` tells you what is running.
@@ -97,8 +97,9 @@ else
   rm -rf "$ROOT.tmp"; git clone -q "https://github.com/${ORG}/workspace.git" "$ROOT.tmp" || die "could not clone ${ORG}/workspace"
   cp -a "$ROOT.tmp/." "$ROOT/" && rm -rf "$ROOT.tmp"; sub "workspace ✓"
 fi
-clone backend hannah-backend
-clone agent   hannah-agent
+clone backend      hannah-backend
+clone motion-model hannah-motion-lab
+clone agent        hannah-agent
 
 # ── 4. backend + sidecars (CPU) ───────────────────────────────────────────────────────
 say "backend"
@@ -106,8 +107,8 @@ say "backend"
   [ -d node_modules ] || npm install --no-audit --no-fund
   if [ ! -f .env ]; then
     cp .env.example .env
-    # local brain + local listening; the gesture model is CUDA-only, so it stays off here
-    sed -i '' 's/^LLM_MODEL=.*/LLM_MODEL=qwen2.5:7b/; s/^ASR_PROVIDER=.*/ASR_PROVIDER=local/; s/^MOTION_ENABLED=.*/MOTION_ENABLED=false/' .env
+    # local listening; the brain is chosen on first run
+    sed -i '' 's/^LLM_MODEL=.*/LLM_MODEL=qwen2.5:7b/; s/^ASR_PROVIDER=.*/ASR_PROVIDER=local/' .env
     tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
     sed -i '' "s|^#\{0,1\}[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
     chmod 600 .env
@@ -122,6 +123,35 @@ say "backend"
     uv pip install -q -p .venv/bin/python -r "$tmp/req-mac.txt" || die "sidecar dependencies failed"
   fi
   sub "sidecars ✓" )
+say "gesture model (text → motion, on Apple's GPU or the CPU)"
+( cd "$ROOT/hannah-motion-lab"
+  if [ ! -x .venv/bin/python ]; then
+    uv venv .venv --python 3.12 >/dev/null || die "uv could not create the motion venv"
+    # macOS: the PyPI torch build carries MPS (Apple Silicon) and CPU
+    uv pip install -q -p .venv/bin/python torch || die "torch install failed"
+    uv pip install -q -p .venv/bin/python -r requirements-serve.txt || die "motion dependencies failed"
+  fi
+  sub "motion-lab ✓" )
+say "gesture model (weights)"
+MODELS_API="https://api.github.com/repos/${ORG}/motion-model/releases/tags/models"
+code="$(curl -fsSL -o "$tmp/models.json" -w '%{http_code}' "$MODELS_API" 2>/dev/null)" || true
+[ "${code:-000}" = "200" ] || die "could not read the models release (HTTP ${code:-network error})."
+masset() { grep -o "\"browser_download_url\": *\"[^\"]*$1\"" "$tmp/models.json" | head -n1 | sed 's/.*"\(https[^"]*\)"/\1/'; }
+msums="$(masset SHA256SUMS)"; [ -n "$msums" ] && curl -fsSL -o "$tmp/models.sums" "$msums" || warn "the models release ships no SHA256SUMS: weights will not be verified"
+dlw() {  # url, dest — verified against the models release's SHA256SUMS
+  fetch "$1" "$2.part"
+  if [ -s "$tmp/models.sums" ]; then
+    want="$(grep -E " [*]?$(basename "$1")\$" "$tmp/models.sums" | awk '{print $1}' | head -1)"
+    got="$(shasum -a 256 "$2.part" | awk '{print $1}')"
+    [ -z "$want" ] || [ "$got" = "$want" ] || { rm -f "$2.part"; die "checksum mismatch for $(basename "$1")"; }
+  fi
+  mv -f "$2.part" "$2"
+}
+( cd "$ROOT/hannah-motion-lab"
+  mkdir -p runs/vae runs/flow
+  [ -f runs/vae/latest.pt ]  || { sub "gesture model: vae (174 MB)";  dlw "$(masset motion-vae-latest.pt)"  runs/vae/latest.pt; }
+  [ -f runs/flow/latest.pt ] || { sub "gesture model: flow (213 MB)"; dlw "$(masset motion-flow-latest.pt)" runs/flow/latest.pt; }
+  sub "gestures ✓" )
 say "voice model"
 ( cd "$ROOT/hannah-backend/sidecar/tts"
   [ -f kokoro-v1.0.onnx ] || { sub "Kokoro voice model (311 MB)"; fetch "$KOKORO/kokoro-v1.0.onnx" kokoro-v1.0.onnx; }
@@ -176,7 +206,7 @@ cat <<EOF
 
   ${C_INFO}Hannah is installed.${C_OFF}   ${C_DIM}($ROOT)${C_OFF}
 
-  Run her (brings up voice, listening and the overlay; the first time she asks where to think):
+  Run her (brings up voice, listening, gestures and the overlay; the first time she asks where to think):
 
       ${C_WARN}hannah${C_OFF}
 
@@ -184,8 +214,8 @@ cat <<EOF
       hannah doctor     what is running
       hannah stop       shut everything down
 
-  On macOS the voice runs on the CPU (a second or two per sentence) and there is no gesture
-  model (CUDA only): the avatar breathes and looks around, but does not gesture while speaking.
+  On macOS the voice runs on the CPU and the gestures on Apple's GPU (MPS) or the CPU: each
+  sentence takes a bit longer to prepare than with an NVIDIA card, but she moves while she speaks.
   Nothing else was installed: no Ollama, no language model — that is her first question.
 
   Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):

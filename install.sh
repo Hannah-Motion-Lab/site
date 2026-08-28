@@ -162,12 +162,12 @@ say "gesture model (text → motion)"
       # torch must come from the CUDA 12.8 index (RTX 50xx needs it; older GPUs work too)
       if [ -n "$NVIDIA" ]; then uv pip install -q torch --index-url https://download.pytorch.org/whl/cu128
       else uv pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
-      uv pip install -q -r requirements.txt
+      uv pip install -q -r requirements-serve.txt
     else
       python3 -m venv .venv
       if [ -n "$NVIDIA" ]; then .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cu128
       else .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
-      .venv/bin/pip install -q -r requirements.txt
+      .venv/bin/pip install -q -r requirements-serve.txt
     fi
   fi
   sub "motion-lab ✓" )

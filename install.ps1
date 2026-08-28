@@ -9,7 +9,8 @@
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      per-user if you say so, or a provider key)
 #   3. clones the Hannah repos into %USERPROFILE%\Hannah-Motion
-#   4. backend + voice/listening sidecars on the CPU (the gesture model is Linux/CUDA only)
+#   4. backend + voice/listening sidecars, and the gesture model (text → motion) on your NVIDIA
+#      card if there is one, else on the CPU (slower, but she moves while she speaks)
 #   5. the overlay app from the latest release (per-user install, silent)
 #   6. a `hannah` command: `hannah` brings everything up and opens the window,
 #      `hannah stop` shuts it down, `hannah doctor` tells you what is running.
@@ -100,8 +101,9 @@ function Install-Hannah {
     git clone -q "https://github.com/$Org/workspace.git" "$Root.tmp"; if ($LASTEXITCODE) { Die "could not clone $Org/workspace" }
     Copy-Item "$Root.tmp\*" $Root -Recurse -Force; Remove-Item "$Root.tmp" -Recurse -Force; Sub 'workspace ✓'
   }
-  Clone backend hannah-backend
-  Clone agent   hannah-agent
+  Clone backend      hannah-backend
+  Clone motion-model hannah-motion-lab
+  Clone agent        hannah-agent
 
   # ── 4. backend + sidecars (CPU) ─────────────────────────────────────────────────────
   Say 'backend'
@@ -110,7 +112,7 @@ function Install-Hannah {
   if (-not (Test-Path 'node_modules')) { npm install --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'npm install failed in hannah-backend' } }
   if (-not (Test-Path '.env')) {
     $envText = Get-Content '.env.example' -Raw
-    $envText = $envText -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=qwen2.5:7b' -replace '(?m)^ASR_PROVIDER=.*$', 'ASR_PROVIDER=local' -replace '(?m)^MOTION_ENABLED=.*$', 'MOTION_ENABLED=false'
+    $envText = $envText -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=qwen2.5:7b' -replace '(?m)^ASR_PROVIDER=.*$', 'ASR_PROVIDER=local'
     $tok = -join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Maximum 16) })
     $envText = $envText -replace '(?m)^#?\s*HANNAH_AGENT_TOKEN=.*$', "HANNAH_AGENT_TOKEN=$tok"
     Set-Content '.env' $envText -NoNewline
@@ -126,6 +128,39 @@ function Install-Hannah {
   }
   Pop-Location
   Sub 'sidecars ✓'
+  Say 'gesture model (text → motion)'
+  $lab = Join-Path $Root 'hannah-motion-lab'
+  Push-Location $lab
+  if (-not (Test-Path '.venv\Scripts\python.exe')) {
+    uv venv .venv --python 3.12 | Out-Null; if ($LASTEXITCODE) { Pop-Location; Die 'uv could not create the motion venv' }
+    $nvidia = [bool](Get-Command nvidia-smi -ErrorAction SilentlyContinue)
+    if ($nvidia) { Sub 'torch (CUDA 12.8)'; uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cu128 }
+    else { Sub 'torch (CPU)'; uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cpu }
+    if ($LASTEXITCODE) { Pop-Location; Die 'torch install failed' }
+    uv pip install -q -p .venv\Scripts\python.exe -r requirements-serve.txt; if ($LASTEXITCODE) { Pop-Location; Die 'motion dependencies failed' }
+  }
+  Sub 'motion-lab ✓'
+  $mrel = Invoke-RestMethod "https://api.github.com/repos/$Org/motion-model/releases/tags/models" -UseBasicParsing
+  $msums = $mrel.assets | Where-Object { $_.name -eq 'SHA256SUMS' } | Select-Object -First 1
+  $sumText = if ($msums) { (Invoke-WebRequest $msums.browser_download_url -UseBasicParsing).Content } else { '' }
+  function Get-Weight($name, $dest) {
+    if (Test-Path $dest) { return }
+    $a = $mrel.assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
+    if (-not $a) { Die "the models release has no $name" }
+    Sub "gesture model: $name"
+    New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+    Fetch $a.browser_download_url "$dest.part"
+    if ($sumText) {
+      $want = (($sumText -split "`n" | Where-Object { $_ -match [regex]::Escape($name) + '$' } | Select-Object -First 1) -split '\s+')[0]
+      $got = (Get-FileHash "$dest.part" -Algorithm SHA256).Hash.ToLower()
+      if ($want -and $got -ne $want.ToLower()) { Remove-Item "$dest.part"; Die "checksum mismatch for $name" }
+    }
+    Move-Item -Force "$dest.part" $dest
+  }
+  Get-Weight 'motion-vae-latest.pt'  (Join-Path $lab 'runs\vae\latest.pt')
+  Get-Weight 'motion-flow-latest.pt' (Join-Path $lab 'runs\flow\latest.pt')
+  Sub 'gestures ✓'
+  Pop-Location
   Say 'voice model'
   $tts = Join-Path $back 'sidecar\tts'
   if (-not (Test-Path "$tts\kokoro-v1.0.onnx")) { Sub 'Kokoro voice model (311 MB)'; Fetch "$Kokoro/kokoro-v1.0.onnx" "$tts\kokoro-v1.0.onnx" }
@@ -179,8 +214,8 @@ function Install-Hannah {
   Write-Host '  Other commands:   hannah doctor   ·   hannah stop'
   Write-Host ''
   Write-Host '  Nothing else was installed: no Ollama, no language model — that is her first question.'
-  Write-Host '  On Windows the voice runs on the CPU and there is no gesture model (Linux/CUDA only):'
-  Write-Host '  the avatar breathes and looks around, but does not gesture while speaking.'
+  Write-Host '  Voice and listening run on the CPU; the gestures on your NVIDIA card if there is one, else on the CPU'
+  Write-Host '  (each sentence takes a bit longer to prepare, but she moves while she speaks).'
   Write-Host '  SmartScreen may show "Windows protected your PC" the first time: More info → Run anyway.'
   Write-Host ''
   Write-Host "  Docs: $Docs"

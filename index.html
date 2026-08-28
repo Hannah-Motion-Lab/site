@@ -198,8 +198,8 @@
             <tr><th scope="row">Voice</th><td>Kokoro on the GPU &middot; 0.9&nbsp;GB</td><td>Kokoro on the CPU (slower), or ElevenLabs</td></tr>
             <tr><th scope="row">Listening</th><td>Whisper, local &middot; 0.8&nbsp;GB</td><td>Cloud transcription</td></tr>
             <tr><th scope="row">Vision</th><td>moondream, loaded only while the camera is on &middot; 2.4&nbsp;GB</td><td>Off</td></tr>
-            <tr><th scope="row">Body language</th><td>Our motion model &middot; 1.2&nbsp;GB</td><td>Same &mdash; the one part that needs an NVIDIA card (CUDA-only today)</td></tr>
-            <tr><th scope="row">Needs</th><td>NVIDIA, 16&nbsp;GB for all of it at once</td><td>A small NVIDIA card for the body language; what you send to a provider leaves the machine</td></tr>
+            <tr><th scope="row">Body language</th><td>Our motion model &middot; 1.2&nbsp;GB</td><td>Same, on the CPU (slower to prepare each sentence, but she still moves)</td></tr>
+            <tr><th scope="row">Needs</th><td>NVIDIA, 16&nbsp;GB for all of it at once</td><td>Any machine; an NVIDIA card makes the gestures instant, the CPU makes them a little late; what you send to a provider leaves the machine</td></tr>
           </tbody>
         </table>
         <div class="vram">
@@ -252,9 +252,9 @@
         <code id="cmd-win" data-os="win" hidden>irm https://hannah-motion-lab.github.io/site/install.ps1 | iex</code>
         <button id="copy" class="copy" type="button" aria-label="Copy install command">Copy</button>
       </div>
-      <p class="os-note" data-os="linux">x86_64 &middot; the only install with the gesture model (needs an NVIDIA card) &middot; the brain, local or cloud, is her first question.</p>
-      <p class="os-note" data-os="mac" hidden>Apple Silicon or Intel &middot; needs <code>git</code> (Xcode Command Line Tools) &middot; voice on the CPU, no gesture model &middot; the overlay app goes to <code>~/Applications</code>, unsigned but de-quarantined for you.</p>
-      <p class="os-note" data-os="win" hidden>Windows 10/11 x64, in PowerShell &middot; voice on the CPU, no gesture model &middot; the overlay installs per-user; SmartScreen may ask &ldquo;More info &rarr; Run anyway&rdquo; once.</p>
+      <p class="os-note" data-os="linux">x86_64 &middot; everything on your NVIDIA card if there is one, else on the CPU &middot; the brain, local or cloud, is her first question.</p>
+      <p class="os-note" data-os="mac" hidden>Apple Silicon or Intel &middot; needs <code>git</code> (Xcode Command Line Tools) &middot; gestures on Apple&rsquo;s GPU, voice on the CPU &middot; the overlay app goes to <code>~/Applications</code>, unsigned but de-quarantined for you.</p>
+      <p class="os-note" data-os="win" hidden>Windows 10/11 x64, in PowerShell &middot; gestures on your NVIDIA card if there is one, else on the CPU &middot; the overlay installs per-user; SmartScreen may ask &ldquo;More info &rarr; Run anyway&rdquo; once.</p>
       <ol class="after">
         <li><code>hannah</code> &mdash; she appears in the corner of your screen and asks where to think: <strong>on this PC</strong> (she installs Ollama in your user folder and downloads the model, if you say so) or <strong>a provider key</strong> (Groq, OpenAI, Anthropic, OpenRouter).</li>
         <li>Say hi. She answers, and moves while she does.</li>
@@ -263,7 +263,7 @@
       <dl class="facts facts-row">
         <div><dt>Then</dt><dd><code>hannah doctor</code> checks your desktop &middot; <code>hannah stop</code> frees the GPU</dd></div>
         <div><dt>Size</dt><dd>~2&nbsp;GB, plus the brain you pick on first run (4.7&nbsp;GB local, or none with a provider)</dd></div>
-        <div><dt>Platform</dt><dd>Linux x86_64 &middot; macOS 12+ &middot; Windows 10/11 x64 &mdash; one command each, no admin. Gestures are Linux + NVIDIA only.</dd></div>
+        <div><dt>Platform</dt><dd>Linux x86_64 &middot; macOS 12+ &middot; Windows 10/11 x64 &mdash; one command each, no admin. An NVIDIA card makes her quick; without one, everything runs on the CPU, slower.</dd></div>
       </dl>
       <details class="source">
         <summary>Build from source instead</summary>
@@ -303,7 +303,7 @@ cat SETUP.md</code></pre>
         <div><dt>Does it send my data anywhere?</dt><dd>Not by default: the backend listens on localhost and every model runs on your machine. Only what you deliberately point at a provider leaves it &mdash; a cloud brain, a cloud voice, or the agent&rsquo;s model.</dd></div>
         <div><dt>What does it cost?</dt><dd>Nothing. Hannah is MIT-licensed. If you plug in a cloud provider, they bill you directly &mdash; an agent task on a frontier model is a few cents.</dd></div>
         <div><dt>Do I have to install Ollama?</dt><dd>No. The installer never touches it. On first launch Hannah asks where she should think: <em>on this PC</em> &mdash; she detects an Ollama you already have, or installs one in your user folder and downloads the model with a progress bar, if you press the button &mdash; or <em>a provider</em> (Groq, OpenAI, Anthropic, OpenRouter) with a key you paste. Vision and long-term memory come with the local brain; with a provider, what you say to her leaves your machine.</dd></div>
-        <div><dt>Does it run on Windows or macOS?</dt><dd>Yes, one command each, no admin (see the install section). The voice runs on the CPU there and the gesture model is Linux + NVIDIA only, so she idles and looks around but does not gesture while speaking.</dd></div>
+        <div><dt>Does it run on Windows or macOS?</dt><dd>Yes, one command each, no admin (see the install section). Everything runs there too: the gestures use Apple&rsquo;s GPU on a Mac, or an NVIDIA card on Windows, and fall back to the CPU otherwise &mdash; each sentence takes a bit longer to prepare, but she moves while she speaks.</dd></div>
         <div><dt>Can I change how she looks or sounds?</dt><dd>Yes. Her look is a VRM avatar file; her voice is any Kokoro voice (listen before you pick) or an ElevenLabs one. Language follows the voice.</dd></div>
         <div><dt>Can I use a cloud model instead of Ollama?</dt><dd>Any OpenAI-compatible endpoint, from the panel, without a restart: Groq, OpenAI, Anthropic, OpenRouter, or your own server.</dd></div>
       </dl>
