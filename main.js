@@ -43,30 +43,6 @@
     });
   }
 
-  // 4) "Just the window": the raw builds as small links, resolved from the latest GitHub
-  //    release (name suffix -> label, plus size and version). Without the API the line keeps
-  //    its link to the releases page.
-  const directs = document.querySelectorAll('.direct-links[data-assets]');
-  if (directs.length && 'fetch' in window) {
-    fetch('https://api.github.com/repos/Hannah-Motion-Lab/desktop/releases/latest', { headers: { accept: 'application/vnd.github+json' } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((rel) => {
-        if (!rel || !Array.isArray(rel.assets)) return;
-        const sums = rel.assets.find((x) => x.name === 'SHA256SUMS');
-        for (const span of directs) {
-          const links = [];
-          for (const pair of span.dataset.assets.split('|')) {
-            const [suffix, label] = pair.split('=');
-            const asset = rel.assets.find((x) => x.name.endsWith(suffix));
-            if (asset) links.push(`<a href="${asset.browser_download_url}">${label} <span class="ver">(${(asset.size / 1048576).toFixed(0)} MB)</span></a>`);
-          }
-          if (!links.length) continue;
-          span.innerHTML = `<span class="ver">Hannah ${rel.tag_name.replace(/^v/, '')} ·</span> ${links.join('')}${sums ? ` <a href="${sums.browser_download_url}">SHA256SUMS</a>` : ''}`;
-        }
-      })
-      .catch(() => {});
-  }
-
   const video = document.getElementById('demo');
   const watch = document.getElementById('watch');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

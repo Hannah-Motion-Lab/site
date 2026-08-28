@@ -392,10 +392,3 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .os-ico { width: 14px; height: 14px; fill: currentColor; flex: none; }
 .os-ico-cut { fill: var(--void); }
 .os-tab.is-active .os-ico-cut { fill: #1a1330; }
-/* "just the window": the raw builds as one quiet line under the command, filled from the release */
-.direct { margin-top: 10px; font-size: 13px; color: var(--text-3); }
-.direct a { color: var(--text-2); text-decoration-color: var(--fog-3); text-underline-offset: 3px; }
-.direct a:hover { color: var(--neon); text-decoration-color: currentColor; }
-.direct-links a + a::before { content: " · "; color: var(--text-3); }
-.direct .ver { color: var(--text-3); }
-.direct code { white-space: nowrap; }
