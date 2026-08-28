@@ -194,7 +194,20 @@ function Install-Hannah {
   $rel = Invoke-RestMethod $Api -UseBasicParsing -ErrorAction Stop
   $asset = $rel.assets | Where-Object { $_.name -like '*-win-x64.exe' } | Select-Object -First 1
   if (-not $asset) { Die 'the latest release has no Windows build.' }
-  $appExe = Join-Path $env:LOCALAPPDATA 'Programs\Hannah\Hannah.exe'
+  # Where electron-builder's per-user NSIS puts it by default, and where it went if not there:
+  # the Uninstall key it writes (InstallLocation) or any Hannah.exe under Programs\*.
+  function Find-HannahExe {
+    $default = Join-Path $env:LOCALAPPDATA 'Programs\Hannah\Hannah.exe'
+    if (Test-Path $default) { return $default }
+    foreach ($k in (Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue)) {
+      $v = Get-ItemProperty $k.PSPath -ErrorAction SilentlyContinue
+      if ($v.DisplayName -like 'Hannah*' -and $v.InstallLocation) { $c = Join-Path $v.InstallLocation 'Hannah.exe'; if (Test-Path $c) { return $c } }
+    }
+    $hit = Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Programs') -Filter 'Hannah.exe' -Recurse -Depth 2 -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($hit) { return $hit.FullName }
+    return $default
+  }
+  $appExe = Find-HannahExe
   $ver = ($asset.name -replace '^Hannah-([\d.]+)-.*$', '$1')
   $installed = if (Test-Path $appExe) { (Get-Item $appExe).VersionInfo.ProductVersion } else { '' }
   if ($installed -eq $ver) { Sub "Hannah.exe ok (already $ver)" }
@@ -206,10 +219,18 @@ function Install-Hannah {
       $got = (Get-FileHash "$tmp\HannahSetup.exe" -Algorithm SHA256).Hash.ToLower()
       if ($want -and $got -ne $want.ToLower()) { Die "checksum mismatch for $($asset.name), nothing was installed" }
     } else { Warn 'no SHA256SUMS: the app was not verified' }
-    # NSIS one-click, per-user (no UAC): lands in %LOCALAPPDATA%\Programs\Hannah
-    Start-Process -Wait -FilePath "$tmp\HannahSetup.exe" -ArgumentList '/S'
-    if (-not (Test-Path $appExe)) { Die "the app did not install to $appExe" }
-    Sub "Hannah $ver -> $appExe ok"
+    # NSIS one-click, per-user (no UAC): lands in %LOCALAPPDATA%\Programs\Hannah. The download
+    # carries the mark of the web; without Unblock-File SmartScreen can refuse a silent run.
+    Unblock-File "$tmp\HannahSetup.exe" -ErrorAction SilentlyContinue
+    $proc = Start-Process -Wait -PassThru -FilePath "$tmp\HannahSetup.exe" -ArgumentList '/S' -ErrorAction Stop
+    Start-Sleep 2
+    $appExe = Find-HannahExe
+    if (-not (Test-Path $appExe)) {
+      # not fatal: everything else is installed; keep the installer next to the code so it can be
+      # run by hand (SmartScreen: More info -> Run anyway), and the launcher will say where it looks.
+      Copy-Item "$tmp\HannahSetup.exe" (Join-Path $Root 'HannahSetup.exe') -Force
+      Warn "the overlay did not install silently (installer exit code $($proc.ExitCode)). Run it yourself: $Root\HannahSetup.exe  (if SmartScreen shows up: More info -> Run anyway), then `hannah`."
+    } else { Sub "Hannah $ver -> $appExe ok" }
   }
 
   # -- 7. the launcher -----------------------------------------------------------------
