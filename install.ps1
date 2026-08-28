@@ -149,8 +149,9 @@ function Install-Hannah {
     if ($nvidia) { Sub 'torch (CUDA 12.8)'; uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cu128 }
     else { Sub 'torch (CPU)'; uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cpu }
     if ($LASTEXITCODE) { Pop-Location; Die 'torch install failed' }
-    uv pip install -q -p .venv\Scripts\python.exe -r requirements-serve.txt; if ($LASTEXITCODE) { Pop-Location; Die 'motion dependencies failed' }
   }
+  # every run, not only on creation: a pull can bring a new serving dependency
+  uv pip install -q -p .venv\Scripts\python.exe -r requirements-serve.txt; if ($LASTEXITCODE) { Pop-Location; Die 'motion dependencies failed' }
   Sub 'motion-lab ok'
   $mrel = Invoke-RestMethod "https://api.github.com/repos/$Org/motion-model/releases/tags/models" -UseBasicParsing -ErrorAction Stop
   $msums = $mrel.assets | Where-Object { $_.name -eq 'SHA256SUMS' } | Select-Object -First 1

@@ -174,14 +174,14 @@ say "gesture model (text → motion)"
       # torch must come from the CUDA 12.8 index (RTX 50xx needs it; older GPUs work too)
       if [ -n "$NVIDIA" ]; then uv pip install -q torch --index-url https://download.pytorch.org/whl/cu128
       else uv pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
-      uv pip install -q -r requirements-serve.txt
     else
       python3 -m venv .venv
       if [ -n "$NVIDIA" ]; then .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cu128
       else .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
-      .venv/bin/pip install -q -r requirements-serve.txt
     fi
   fi
+  # every run, not only on creation: a pull can bring a new serving dependency
+  if has uv; then uv pip install -q -p .venv/bin/python -r requirements-serve.txt; else .venv/bin/pip install -q -r requirements-serve.txt; fi
   sub "motion-lab ✓" )
 
 # ── 5. weights that are not in git ────────────────────────────────────────────────────

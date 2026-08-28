@@ -137,9 +137,10 @@ say "gesture model (text → motion, on Apple's GPU or the CPU)"
     uv venv .venv --python 3.12 >/dev/null || die "uv could not create the motion venv"
     # macOS: the PyPI torch build carries MPS (Apple Silicon) and CPU
     uv pip install -q -p .venv/bin/python torch || die "torch install failed"
-    uv pip install -q -p .venv/bin/python -r requirements-serve.txt || die "motion dependencies failed"
   fi
-  sub "motion-lab ✓" )
+  # every run, not only on creation: a pull can bring a new serving dependency
+  uv pip install -q -p .venv/bin/python -r requirements-serve.txt || die "motion dependencies failed"
+  sub "motion-lab ok" )
 say "gesture model (weights)"
 MODELS_API="https://api.github.com/repos/${ORG}/motion-model/releases/tags/models"
 code="$(curl -fsSL -o "$tmp/models.json" -w '%{http_code}' "$MODELS_API" 2>/dev/null)" || true
