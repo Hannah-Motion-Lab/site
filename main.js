@@ -23,6 +23,29 @@
     });
   }
 
+  // 4) Desktop builds: the links point at the releases page; if the GitHub API answers, each
+  //    one becomes a direct download of the matching asset (by name suffix) with its size.
+  const builds = document.querySelectorAll('.builds-list a[data-asset]');
+  if (builds.length && 'fetch' in window) {
+    fetch('https://api.github.com/repos/Hannah-Motion-Lab/desktop/releases/latest', { headers: { accept: 'application/vnd.github+json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((rel) => {
+        if (!rel || !Array.isArray(rel.assets)) return;
+        for (const a of builds) {
+          const asset = rel.assets.find((x) => x.name.endsWith(a.dataset.asset));
+          const hint = a.querySelector('span');
+          if (asset) {
+            a.href = asset.browser_download_url;
+            if (hint) hint.textContent = `${hint.textContent} · ${(asset.size / 1048576).toFixed(0)} MB · ${rel.tag_name}`;
+          } else {
+            a.classList.add('is-missing');
+            if (hint) hint.textContent = `${hint.textContent} · not in ${rel.tag_name} yet`;
+          }
+        }
+      })
+      .catch(() => {});
+  }
+
   const video = document.getElementById('demo');
   const watch = document.getElementById('watch');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

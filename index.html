@@ -253,8 +253,18 @@
       <dl class="facts facts-row">
         <div><dt>Then</dt><dd><code>hannah doctor</code> checks your desktop &middot; <code>hannah stop</code> frees the GPU</dd></div>
         <div><dt>Size</dt><dd>~20&nbsp;GB with all models, built and downloaded on your machine</dd></div>
-        <div><dt>Platform</dt><dd>Linux x86_64. Windows and macOS builds exist and are untested.</dd></div>
+        <div><dt>Platform</dt><dd>Linux x86_64 for the one-command install. macOS and Windows: overlay builds below, stack by hand.</dd></div>
       </dl>
+      <div class="builds" id="builds" aria-labelledby="builds-title">
+        <p class="sub" id="builds-title">Desktop overlay builds &mdash; preview</p>
+        <ul class="builds-list">
+          <li><a data-asset="-linux-x64.AppImage" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">Linux <span>AppImage &middot; x86_64</span></a></li>
+          <li><a data-asset="-mac-arm64.dmg" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">macOS <span>Apple Silicon &middot; dmg</span></a></li>
+          <li><a data-asset="-mac-x64.dmg" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">macOS <span>Intel &middot; dmg</span></a></li>
+          <li><a data-asset="-win-x64.exe" href="https://github.com/Hannah-Motion-Lab/desktop/releases/latest" target="_blank" rel="noopener">Windows <span>installer &middot; x64</span></a></li>
+        </ul>
+        <p class="src">The overlay window only: on macOS and Windows the brain, voice and hands are still set up by hand (<a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md#macos-and-windows" target="_blank" rel="noopener">Setup guide</a>), and the gesture model needs an NVIDIA card. The builds are unsigned: macOS says &ldquo;can&rsquo;t be opened&rdquo; until you run <code>xattr -dr com.apple.quarantine ~/Applications/Hannah.app</code> (no admin needed); Windows SmartScreen wants &ldquo;More info &rarr; Run anyway&rdquo;.</p>
+      </div>
       <details class="source">
         <summary>Build from source instead</summary>
 <pre><code>git clone https://github.com/Hannah-Motion-Lab/workspace.git Hannah-Motion
@@ -292,7 +302,7 @@ cat SETUP.md</code></pre>
         <div><dt>Do I need an NVIDIA GPU?</dt><dd>Only for everything local at once. With a cloud brain, the voice on the CPU and vision off, a small NVIDIA card is enough &mdash; the motion model runs on CUDA and is the one part that needs one.</dd></div>
         <div><dt>Does it send my data anywhere?</dt><dd>Not by default: the backend listens on localhost and every model runs on your machine. Only what you deliberately point at a provider leaves it &mdash; a cloud brain, a cloud voice, or the agent&rsquo;s model.</dd></div>
         <div><dt>What does it cost?</dt><dd>Nothing. Hannah is MIT-licensed. If you plug in a cloud provider, they bill you directly &mdash; an agent task on a frontier model is a few cents.</dd></div>
-        <div><dt>Does it run on Windows or macOS?</dt><dd>Builds exist in the repo and are untested. Linux x86_64 is what ships today.</dd></div>
+        <div><dt>Does it run on Windows or macOS?</dt><dd>The overlay does &mdash; preview builds are in the install section. The rest of the stack (brain, voice, hands) is a manual setup there for now, and gestures need an NVIDIA card. Linux x86_64 is what the one-command install covers.</dd></div>
         <div><dt>Can I change how she looks or sounds?</dt><dd>Yes. Her look is a VRM avatar file; her voice is any Kokoro voice (listen before you pick) or an ElevenLabs one. Language follows the voice.</dd></div>
         <div><dt>Can I use a cloud model instead of Ollama?</dt><dd>Any OpenAI-compatible endpoint, from the panel, without a restart: Groq, OpenAI, Anthropic, OpenRouter, or your own server.</dd></div>
       </dl>
