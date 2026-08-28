@@ -10,14 +10,17 @@
 #      per-user if you say so, or a provider key)
 #   3. clones the Hannah repos into %USERPROFILE%\Hannah-Motion
 #   4. backend + voice/listening sidecars, the watches (hannah-sense) and the
-#      gesture model (text → motion) on your NVIDIA card if there is one, else on the CPU
+#      gesture model (text -> motion) on your NVIDIA card if there is one, else on the CPU
 #   5. the overlay app from the latest release (per-user install, silent)
 #   6. a `hannah` command: `hannah` brings everything up and opens the window,
 #      `hannah stop` shuts it down, `hannah doctor` tells you what is running.
 # If PowerShell refuses to run scripts:  Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 function Install-Hannah {
-  $ErrorActionPreference = 'Stop'
+  # 'Continue', not 'Stop': in Windows PowerShell 5.1 a native program that writes to stderr
+  # (bun, npm, git, uv all do) becomes a terminating NativeCommandError under 'Stop'. Failures
+  # are checked by hand ($LASTEXITCODE) and the cmdlets that matter carry -ErrorAction Stop.
+  $ErrorActionPreference = 'Continue'
   $ProgressPreference = 'SilentlyContinue'
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -33,7 +36,7 @@ function Install-Hannah {
   function Warn($m) { Write-Host "warning: $m" -ForegroundColor Yellow }
   function Die($m)  { Write-Host "error: $m" -ForegroundColor Red; throw $m }
   function Has($c)  { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
-  function Fetch($url, $out) { Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing }
+  function Fetch($url, $out) { Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing -ErrorAction Stop }
   function Add-UserPath($dir) {
     if (-not (Test-Path $dir)) { return }
     $cur = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -46,15 +49,15 @@ function Install-Hannah {
   $tmp = Join-Path ([IO.Path]::GetTempPath()) ("hannah-" + [guid]::NewGuid().ToString('N'))
   New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 
-  # ── 1. tools, portable, in your profile ──────────────────────────────────────────────
+  # -- 1. tools, portable, in your profile ----------------------------------------------
   Say 'tools (portable copies in your profile, no admin)'
   if (-not (Has git)) {
     Sub 'Git (MinGit, portable)'
-    $rel = Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest' -UseBasicParsing
+    $rel = Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest' -UseBasicParsing -ErrorAction Stop
     $a = $rel.assets | Where-Object { $_.name -match '^MinGit-[\d.]+-64-bit\.zip$' } | Select-Object -First 1
     if (-not $a) { Die 'could not find a MinGit build' }
     Fetch $a.browser_download_url "$tmp\git.zip"
-    Expand-Archive "$tmp\git.zip" -DestinationPath "$Tools\git" -Force
+    Expand-Archive "$tmp\git.zip" -DestinationPath "$Tools\git" -Force -ErrorAction Stop
     Add-UserPath "$Tools\git\cmd"
   }
   $nodeOk = (Has node) -and ([int]((node -p 'process.versions.node.split(".")[0]') 2>$null) -ge 20)
@@ -64,9 +67,9 @@ function Install-Hannah {
     $zip = ([regex]'node-v22\.[\d.]+-win-x64\.zip').Match($idx.Content).Value
     if (-not $zip) { Die 'could not find a Node 22 build' }
     Fetch "https://nodejs.org/dist/latest-v22.x/$zip" "$tmp\node.zip"
-    Expand-Archive "$tmp\node.zip" -DestinationPath "$tmp\node" -Force
+    Expand-Archive "$tmp\node.zip" -DestinationPath "$tmp\node" -Force -ErrorAction Stop
     if (Test-Path "$Tools\node") { Remove-Item "$Tools\node" -Recurse -Force }
-    Move-Item (Get-ChildItem "$tmp\node" | Select-Object -First 1).FullName "$Tools\node"
+    Move-Item (Get-ChildItem "$tmp\node" | Select-Object -First 1).FullName "$Tools\node" -ErrorAction Stop
     Add-UserPath "$Tools\node"
   }
   if (-not (Has uv)) {
@@ -83,29 +86,30 @@ function Install-Hannah {
       Add-UserPath (Join-Path $env:USERPROFILE '.bun\bin')
     } catch { Warn 'bun install failed; the agent will not be available' }
   }
-  # ── 2. the brain is NOT installed here ─────────────────────────────────────────────
+  # -- 2. the brain is NOT installed here ---------------------------------------------
   # Where Hannah thinks (Ollama on this PC, or a provider key) is chosen on the FIRST RUN, in
   # her window: she detects Ollama if you already have it, installs it per-user if you ask,
   # and downloads the models with a progress bar.
 
-  # ── 3. repos ────────────────────────────────────────────────────────────────────────
-  Say "code → $Root"
+  # -- 3. repos ------------------------------------------------------------------------
+  Say "code -> $Root"
   function Clone($repo, $dir) {
     $d = Join-Path $Root $dir
-    if (Test-Path (Join-Path $d '.git')) { Push-Location $d; git pull -q --ff-only 2>$null; Pop-Location; Sub "$dir ✓ (updated)" }
-    else { git clone -q "https://github.com/$Org/$repo.git" $d; if ($LASTEXITCODE) { Die "could not clone $Org/$repo" }; Sub "$dir ✓" }
+    if (Test-Path (Join-Path $d '.git')) { Push-Location $d; git pull -q --ff-only 2>$null; Pop-Location; Sub "$dir ok (updated)" }
+    else { git clone -q "https://github.com/$Org/$repo.git" $d; if ($LASTEXITCODE) { Die "could not clone $Org/$repo" }; Sub "$dir ok" }
   }
-  if (Test-Path (Join-Path $Root '.git')) { Push-Location $Root; git pull -q --ff-only 2>$null; Pop-Location; Sub 'workspace ✓ (updated)' }
+  if (Test-Path (Join-Path $Root '.git')) { Push-Location $Root; git pull -q --ff-only 2>$null; Pop-Location; Sub 'workspace ok (updated)' }
   else {
     if (Test-Path "$Root.tmp") { Remove-Item "$Root.tmp" -Recurse -Force }
     git clone -q "https://github.com/$Org/workspace.git" "$Root.tmp"; if ($LASTEXITCODE) { Die "could not clone $Org/workspace" }
-    Copy-Item "$Root.tmp\*" $Root -Recurse -Force; Remove-Item "$Root.tmp" -Recurse -Force; Sub 'workspace ✓'
+    Copy-Item "$Root.tmp\*" $Root -Recurse -Force; Remove-Item "$Root.tmp" -Recurse -Force; Sub 'workspace ok' -ErrorAction Stop
   }
   Clone backend      hannah-backend
   Clone motion-model hannah-motion-lab
   Clone agent        hannah-agent
+  Add-UserPath $Root   # `hannah` (hannah.cmd) is usable from a NEW terminal from this point on
 
-  # ── 4. backend + sidecars (CPU) ─────────────────────────────────────────────────────
+  # -- 4. backend + sidecars (CPU) -----------------------------------------------------
   Say 'backend'
   $back = Join-Path $Root 'hannah-backend'
   Push-Location $back
@@ -127,7 +131,7 @@ function Install-Hannah {
     uv pip install -q -p .venv\Scripts\python.exe -r "$tmp\req-win.txt"; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'sidecar dependencies failed' }
   }
   Pop-Location
-  Sub 'sidecars ✓'
+  Sub 'sidecars ok'
   # the watches (hannah-sense, :8007): its own venv; on Windows R1/R5 use psutil (no pgrep/ss)
   Push-Location 'sidecar\sense'
   if (-not (Test-Path '.venv\Scripts\python.exe')) {
@@ -135,8 +139,8 @@ function Install-Hannah {
     uv pip install -q -p .venv\Scripts\python.exe -r requirements.txt; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'sense dependencies failed' }
   }
   Pop-Location
-  Sub 'hannah-sense ✓'
-  Say 'gesture model (text → motion)'
+  Sub 'hannah-sense ok'
+  Say 'gesture model (text -> motion)'
   $lab = Join-Path $Root 'hannah-motion-lab'
   Push-Location $lab
   if (-not (Test-Path '.venv\Scripts\python.exe')) {
@@ -147,10 +151,10 @@ function Install-Hannah {
     if ($LASTEXITCODE) { Pop-Location; Die 'torch install failed' }
     uv pip install -q -p .venv\Scripts\python.exe -r requirements-serve.txt; if ($LASTEXITCODE) { Pop-Location; Die 'motion dependencies failed' }
   }
-  Sub 'motion-lab ✓'
-  $mrel = Invoke-RestMethod "https://api.github.com/repos/$Org/motion-model/releases/tags/models" -UseBasicParsing
+  Sub 'motion-lab ok'
+  $mrel = Invoke-RestMethod "https://api.github.com/repos/$Org/motion-model/releases/tags/models" -UseBasicParsing -ErrorAction Stop
   $msums = $mrel.assets | Where-Object { $_.name -eq 'SHA256SUMS' } | Select-Object -First 1
-  $sumText = if ($msums) { (Invoke-WebRequest $msums.browser_download_url -UseBasicParsing).Content } else { '' }
+  $sumText = if ($msums) { (Invoke-WebRequest $msums.browser_download_url -UseBasicParsing -ErrorAction Stop).Content } else { '' }
   function Get-Weight($name, $dest) {
     if (Test-Path $dest) { return }
     $a = $mrel.assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
@@ -163,68 +167,68 @@ function Install-Hannah {
       $got = (Get-FileHash "$dest.part" -Algorithm SHA256).Hash.ToLower()
       if ($want -and $got -ne $want.ToLower()) { Remove-Item "$dest.part"; Die "checksum mismatch for $name" }
     }
-    Move-Item -Force "$dest.part" $dest
+    Move-Item -Force "$dest.part" $dest -ErrorAction Stop
   }
   Get-Weight 'motion-vae-latest.pt'  (Join-Path $lab 'runs\vae\latest.pt')
   Get-Weight 'motion-flow-latest.pt' (Join-Path $lab 'runs\flow\latest.pt')
-  Sub 'gestures ✓'
+  Sub 'gestures ok'
   Pop-Location
   Say 'voice model'
   $tts = Join-Path $back 'sidecar\tts'
   if (-not (Test-Path "$tts\kokoro-v1.0.onnx")) { Sub 'Kokoro voice model (311 MB)'; Fetch "$Kokoro/kokoro-v1.0.onnx" "$tts\kokoro-v1.0.onnx" }
   if (-not (Test-Path "$tts\voices-v1.0.bin"))  { Sub 'Kokoro voices (27 MB)';       Fetch "$Kokoro/voices-v1.0.bin"  "$tts\voices-v1.0.bin" }
-  Sub 'voice ✓'
+  Sub 'voice ok'
   Pop-Location
 
-  # ── 5. the hands (agent) ────────────────────────────────────────────────────────────
+  # -- 5. the hands (agent) ------------------------------------------------------------
   Say 'agent (the hands), off until you add an API key'
   if (Has bun) {
     Push-Location (Join-Path $Root 'hannah-agent')
-    if (-not (Test-Path 'node_modules')) { bun install 2>$null | Out-Null }
+    try { if (-not (Test-Path 'node_modules')) { bun install 2>&1 | Out-Null } } catch { Warn "bun install failed: $($_.Exception.Message)" }
     Pop-Location
-    Sub 'agent ✓ (enable it later: AGENT_ENABLED=true + a key, in the ⚙ panel or .env)'
+    Sub 'agent ok (enable it later: AGENT_ENABLED=true + a key, in the (settings) panel or .env)'
   }
 
-  # ── 6. the overlay app (per-user, silent) ───────────────────────────────────────────
+  # -- 6. the overlay app (per-user, silent) -------------------------------------------
   Say 'overlay app'
-  $rel = Invoke-RestMethod $Api -UseBasicParsing
+  $rel = Invoke-RestMethod $Api -UseBasicParsing -ErrorAction Stop
   $asset = $rel.assets | Where-Object { $_.name -like '*-win-x64.exe' } | Select-Object -First 1
   if (-not $asset) { Die 'the latest release has no Windows build.' }
   $appExe = Join-Path $env:LOCALAPPDATA 'Programs\Hannah\Hannah.exe'
   $ver = ($asset.name -replace '^Hannah-([\d.]+)-.*$', '$1')
   $installed = if (Test-Path $appExe) { (Get-Item $appExe).VersionInfo.ProductVersion } else { '' }
-  if ($installed -eq $ver) { Sub "Hannah.exe ✓ (already $ver)" }
+  if ($installed -eq $ver) { Sub "Hannah.exe ok (already $ver)" }
   else {
     Fetch $asset.browser_download_url "$tmp\HannahSetup.exe"
     $sums = $rel.assets | Where-Object { $_.name -eq 'SHA256SUMS' } | Select-Object -First 1
     if ($sums) {
-      $want = ((Invoke-WebRequest $sums.browser_download_url -UseBasicParsing).Content -split "`n" | Where-Object { $_ -match [regex]::Escape($asset.name) + '$' } | Select-Object -First 1) -split '\s+' | Select-Object -First 1
+      $want = ((Invoke-WebRequest $sums.browser_download_url -UseBasicParsing -ErrorAction Stop).Content -split "`n" | Where-Object { $_ -match [regex]::Escape($asset.name) + '$' } | Select-Object -First 1) -split '\s+' | Select-Object -First 1
       $got = (Get-FileHash "$tmp\HannahSetup.exe" -Algorithm SHA256).Hash.ToLower()
       if ($want -and $got -ne $want.ToLower()) { Die "checksum mismatch for $($asset.name), nothing was installed" }
     } else { Warn 'no SHA256SUMS: the app was not verified' }
     # NSIS one-click, per-user (no UAC): lands in %LOCALAPPDATA%\Programs\Hannah
     Start-Process -Wait -FilePath "$tmp\HannahSetup.exe" -ArgumentList '/S'
     if (-not (Test-Path $appExe)) { Die "the app did not install to $appExe" }
-    Sub "Hannah $ver → $appExe ✓"
+    Sub "Hannah $ver -> $appExe ok"
   }
 
-  # ── 7. the launcher ─────────────────────────────────────────────────────────────────
+  # -- 7. the launcher -----------------------------------------------------------------
   Add-UserPath $Root
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 
   Write-Host ''
   Write-Host "  Hannah is installed.   ($Root)" -ForegroundColor Green
   Write-Host ''
-  Write-Host '  Open a NEW terminal (so the PATH is fresh) and run her:'
+  Write-Host '  Open a NEW terminal (this one does not see the updated PATH) and run her:'
   Write-Host ''
   Write-Host '      hannah' -ForegroundColor Yellow
   Write-Host ''
-  Write-Host '  Other commands:   hannah doctor   ·   hannah stop'
+  Write-Host '  Other commands:   hannah doctor   -   hannah stop'
   Write-Host ''
   Write-Host '  Nothing else was installed: no Ollama, no language model, that is her first question.'
   Write-Host '  Voice and listening run on the CPU; the gestures on your NVIDIA card if there is one, else on the CPU'
   Write-Host '  (each sentence takes a bit longer to prepare, but she moves while she speaks).'
-  Write-Host '  SmartScreen may show "Windows protected your PC" the first time: More info → Run anyway.'
+  Write-Host '  SmartScreen may show "Windows protected your PC" the first time: More info -> Run anyway.'
   Write-Host ''
   Write-Host "  Docs: $Docs"
   Write-Host ''
