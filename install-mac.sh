@@ -8,7 +8,7 @@
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      in your user folder if you say so, or a provider key)
 #   3. clones the Hannah repos into ~/Hannah-Motion
-#   4. backend + voice/listening sidecars on the CPU, the watches (hannah-sense, off by default)
+#   4. backend + voice/listening sidecars on the CPU, the watches (hannah-sense)
 #      and the gesture model (text → motion) on Apple's GPU (MPS) or the CPU
 #   5. the overlay app from the latest release (unsigned: the quarantine flag is removed)
 #   6. a `hannah` command on your PATH: `hannah` brings everything up and opens the window,
@@ -130,7 +130,7 @@ say "backend"
     uv venv .venv --python 3.12 >/dev/null || die "uv could not create the sense venv"
     uv pip install -q -p .venv/bin/python -r requirements.txt || die "sense dependencies failed"
   fi
-  sub "hannah-sense ✓ (off until SENSE_ENABLED=true)" )
+  sub "hannah-sense ✓" )
 say "gesture model (text → motion, on Apple's GPU or the CPU)"
 ( cd "$ROOT/hannah-motion-lab"
   if [ ! -x .venv/bin/python ]; then

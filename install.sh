@@ -160,7 +160,7 @@ say "backend"
     if has uv; then uv venv .venv --python 3.12 --system-site-packages >/dev/null 2>&1 || uv venv .venv --system-site-packages >/dev/null; uv pip install -q -r requirements.txt
     else python3 -m venv --system-site-packages .venv && .venv/bin/pip install -q -r requirements.txt; fi
   fi
-  sub "hannah-sense ✓ (off until SENSE_ENABLED=true)"
+  sub "hannah-sense ✓"
 )
 say "frontend"
 ( cd "$ROOT/hannah-frontend"

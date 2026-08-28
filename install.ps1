@@ -9,7 +9,7 @@
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      per-user if you say so, or a provider key)
 #   3. clones the Hannah repos into %USERPROFILE%\Hannah-Motion
-#   4. backend + voice/listening sidecars, the watches (hannah-sense, off by default) and the
+#   4. backend + voice/listening sidecars, the watches (hannah-sense) and the
 #      gesture model (text → motion) on your NVIDIA card if there is one, else on the CPU
 #   5. the overlay app from the latest release (per-user install, silent)
 #   6. a `hannah` command: `hannah` brings everything up and opens the window,
@@ -135,7 +135,7 @@ function Install-Hannah {
     uv pip install -q -p .venv\Scripts\python.exe -r requirements.txt; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'sense dependencies failed' }
   }
   Pop-Location
-  Sub 'hannah-sense ✓ (off until SENSE_ENABLED=true)'
+  Sub 'hannah-sense ✓'
   Say 'gesture model (text → motion)'
   $lab = Join-Path $Root 'hannah-motion-lab'
   Push-Location $lab
