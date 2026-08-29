@@ -62,7 +62,9 @@ fetch_script() { curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"; }
 
 # ── 1. tools, all in $HOME ────────────────────────────────────────────────────────────
 say "tools (in your home folder, no admin)"
-node_ok() { has node && [ "$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)" -ge 20 ]; }
+# only an LTS line with prebuilt native modules (20, 22, 24): a newer node (26) has no
+# better-sqlite3 prebuilds and its npm 12 refuses package install scripts (backend without SQLite)
+node_ok() { has node && case "$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null)" in 20|22|24) return 0 ;; esac; return 1; }
 if ! node_ok; then
   sub "Node 22 (private copy in $TOOLS/node)"
   tgz="$(curl -fsSL https://nodejs.org/dist/latest-v22.x/ | grep -oE "node-v22\.[0-9.]+-${NODE_ARCH}\.tar\.gz" | head -1)"
@@ -71,7 +73,7 @@ if ! node_ok; then
   rm -rf "$TOOLS/node"; mkdir -p "$TOOLS/node"; tar -xzf "$tmp/node.tgz" -C "$TOOLS/node" --strip-components=1
   for b in node npm npx; do ln -sf "$TOOLS/node/bin/$b" "$BIN_DIR/$b"; done
 fi
-node_ok || die "Node 20+ still not usable (is $BIN_DIR on your PATH?)"
+node_ok || die "Node 20/22/24 still not usable (is $BIN_DIR on your PATH?)"
 if ! has uv; then
   sub "uv (Python 3.12 without touching the system)"
   fetch_script "https://astral.sh/uv/install.sh" "$tmp/uv.sh" && sh "$tmp/uv.sh" >/dev/null 2>&1 || die "uv install failed"
@@ -107,6 +109,10 @@ say "backend"
 ( cd "$ROOT/hannah-backend"
   # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
   npm install --no-audit --no-fund
+  # the SQLite binary must exist for THIS node: an earlier install under another node (or an npm
+  # that blocks install scripts) leaves node_modules "complete" but without it, and npm install
+  # then does nothing. prebuild-install fetches it in a second.
+  [ -e node_modules/better-sqlite3/build/Release/better_sqlite3.node ] || npm rebuild better-sqlite3 --no-audit --no-fund
   # node-pty ships prebuilds/darwin-*/spawn-helper at 0644 in its tarball; without +x every
   # terminal session dies with "posix_spawnp failed". The backend's postinstall does this too;
   # here it also covers a node_modules that predates it.

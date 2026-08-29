@@ -60,7 +60,10 @@ function Install-Hannah {
     Expand-Archive "$tmp\git.zip" -DestinationPath "$Tools\git" -Force -ErrorAction Stop
     Add-UserPath "$Tools\git\cmd"
   }
-  $nodeOk = (Has node) -and ([int]((node -p 'process.versions.node.split(".")[0]') 2>$null) -ge 20)
+  # only an LTS line with prebuilt native modules (20, 22, 24): a newer node has no
+  # better-sqlite3 prebuilds and its npm 12 refuses package install scripts (backend without SQLite)
+  $nodeMajor = if (Has node) { [int]((node -p 'process.versions.node.split(".")[0]') 2>$null) } else { 0 }
+  $nodeOk = @(20, 22, 24) -contains $nodeMajor
   if (-not $nodeOk) {
     Sub 'Node 22 (portable)'
     $idx = Invoke-WebRequest 'https://nodejs.org/dist/latest-v22.x/' -UseBasicParsing
@@ -115,6 +118,9 @@ function Install-Hannah {
   Push-Location $back
   # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
   npm install --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'npm install failed in hannah-backend' }
+  # the SQLite binary must exist for THIS node: an earlier install under another node leaves
+  # node_modules "complete" without it and npm install then does nothing
+  if (-not (Test-Path 'node_modules\better-sqlite3\build\Release\better_sqlite3.node')) { npm rebuild better-sqlite3 --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'better-sqlite3 has no binary for this node' } }
   if (-not (Test-Path '.env')) {
     $envText = Get-Content '.env.example' -Raw
     $envText = $envText -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=qwen2.5:7b' -replace '(?m)^ASR_PROVIDER=.*$', 'ASR_PROVIDER=local'

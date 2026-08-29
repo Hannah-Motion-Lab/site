@@ -73,15 +73,31 @@ else
   warn "unknown package manager: make sure git, node 20+, python 3.12+, unzip and curl are installed"; PKG=""; PKGS=""
 fi
 missing=""
-for c in git node npm python3 unzip curl; do has "$c" || missing="$missing $c"; done
+for c in git python3 unzip curl; do has "$c" || missing="$missing $c"; done   # node: see below (private copy if needed)
 if [ -n "$missing" ] && [ -n "$PKG" ]; then
   sub "installing:$missing (needs sudo)"
   $PKG $PKGS
 fi
-has node || die "node is required (20+)."
-node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' || die "node 20+ is required (found $(node -v))."
 has python3 || die "python3 is required (3.12+)."
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+# Node: only an LTS line with prebuilt native modules (20, 22, 24). Anything else (e.g. Node 26
+# on Arch: no better-sqlite3 prebuilds, and its npm 12 refuses to run package install scripts)
+# leaves the backend without its SQLite binary ("Could not locate the bindings file"). In that
+# case a private Node 22 goes to $ROOT/.tools/node; the launcher puts it first on its PATH.
+# The system node is never touched or shadowed.
+TOOLS="$ROOT/.tools"
+node_lts_ok() { has node && case "$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null)" in 20|22|24) return 0 ;; esac; return 1; }
+if [ -x "$TOOLS/node/bin/node" ]; then export PATH="$TOOLS/node/bin:$PATH"; fi
+if ! node_lts_ok; then
+  case "$(uname -m)" in x86_64) NODE_ARCH=linux-x64 ;; aarch64|arm64) NODE_ARCH=linux-arm64 ;; *) die "no Node 22 build for $(uname -m)" ;; esac
+  sub "Node 22 (private copy in $TOOLS/node; your system node $(node -v 2>/dev/null || echo 'is missing') stays as it is)"
+  tgz="$(curl -fsSL https://nodejs.org/dist/latest-v22.x/ | grep -oE "node-v22\.[0-9.]+-${NODE_ARCH}\.tar\.gz" | head -1)"
+  [ -n "$tgz" ] || die "could not find a Node 22 build for ${NODE_ARCH}"
+  curl -fL --proto '=https' --tlsv1.2 --progress-bar -o "$tmp/node.tgz" "https://nodejs.org/dist/latest-v22.x/$tgz" || die "download failed: $tgz"
+  mkdir -p "$TOOLS"; rm -rf "$TOOLS/node"; mkdir -p "$TOOLS/node"; tar -xzf "$tmp/node.tgz" -C "$TOOLS/node" --strip-components=1
+  export PATH="$TOOLS/node/bin:$PATH"
+fi
+node_lts_ok || die "node 20/22/24 is required (found $(node -v 2>/dev/null || echo none))."
 # third-party installers: to a file first, then run, never `curl | sh` (a cut-off download
 # would otherwise run half a script). Their content is whatever the vendor serves today.
 fetch_script() { curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"; }
@@ -133,6 +149,10 @@ say "backend"
 ( cd "$ROOT/hannah-backend"
   # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
   npm install --no-audit --no-fund
+  # the SQLite binary must exist for THIS node: an earlier install under another node (or an npm
+  # that blocks install scripts) leaves node_modules "complete" but without it, and npm install
+  # then does nothing. prebuild-install fetches it in a second.
+  [ -e node_modules/better-sqlite3/build/Release/better_sqlite3.node ] || npm rebuild better-sqlite3 --no-audit --no-fund
   if [ ! -f .env ]; then
     cp .env.example .env
     # defaults that make it work on the first try: the brain that is best at actions, and
