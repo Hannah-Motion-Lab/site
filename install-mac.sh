@@ -4,7 +4,7 @@
 #   curl -fsSL https://hannah-motion-lab.github.io/site/install-mac.sh | bash
 #
 # What it does, all inside your home folder:
-#   1. tools: Node 22 (private copy), uv (Python 3.12), bun (the agent)
+#   1. tools: Node 22 (private copy if needed), uv (Python 3.12). Not bun: `hannah hands on` brings it
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      in your user folder if you say so, or a provider key)
 #   3. clones the Hannah repos into ~/Hannah-Motion
@@ -36,6 +36,28 @@ sub()  { printf '%s\n' "    ${C_DIM}$*${C_OFF}"; }
 warn() { printf '%s\n' "${C_WARN}warning:${C_OFF} $*" >&2; }
 die()  { printf '%s\n' "${C_ERR}error:${C_OFF} $*" >&2; exit 1; }
 has()  { command -v "$1" >/dev/null 2>&1; }
+# step <label> <function>: one line on the terminal, the function's whole output in the log.
+# A failed step shows the last lines of the log and the path, then stops. Downloads are NOT
+# run through here: their progress bar is the one thing worth seeing.
+LOGF=""
+step() {
+  local label="$1"; shift
+  { printf '\n### %s  %s\n' "$(date '+%F %T')" "$label"; } >>"$LOGF"
+  if [ -t 1 ]; then
+    printf '%s' "${C_DIM}==>${C_OFF} ${C_INFO}$label${C_OFF} "
+    "$@" >>"$LOGF" 2>&1 &
+    local pid=$! i=0 sp='|/-\\'
+    while kill -0 "$pid" 2>/dev/null; do printf '%s\b' "${sp:i++%4:1}"; sleep 0.15; done
+    local rc=0; wait "$pid" || rc=$?
+  else
+    printf '%s' "==> $label "
+    local rc=0; "$@" >>"$LOGF" 2>&1 || rc=$?
+  fi
+  if [ "$rc" -eq 0 ]; then printf '%s\n' "${C_DIM}ok${C_OFF}"; return 0; fi
+  printf '%s\n' "${C_ERR}FAILED${C_OFF}"
+  tail -n 25 "$LOGF" | sed 's/^/    /'
+  die "$label failed. Full log: $LOGF"
+}
 
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
   sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
@@ -54,7 +76,8 @@ case "$(uname -m)" in
 esac
 has curl || die "curl is required."
 has git  || die "git is required. Run: xcode-select --install   (Apple's Command Line Tools; this is the one step that may ask for an admin) and re-run."
-mkdir -p "$BIN_DIR" "$TOOLS" "$HOME/Applications"
+mkdir -p "$BIN_DIR" "$TOOLS" "$HOME/Applications" "$ROOT"
+LOGF="$ROOT/.hannah-install.log"; printf '### Hannah install %s\n' "$(date '+%F %T')" >>"$LOGF"
 export PATH="$BIN_DIR:$HOME/.bun/bin:$TOOLS/node/bin:$PATH"
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 fetch() { curl -fL --proto '=https' --tlsv1.2 --progress-bar -o "$2" "$1" || die "download failed: $1"; }
@@ -74,14 +97,10 @@ if ! node_ok; then
   for b in node npm npx; do ln -sf "$TOOLS/node/bin/$b" "$BIN_DIR/$b"; done
 fi
 node_ok || die "Node 20/22/24 still not usable (is $BIN_DIR on your PATH?)"
-if ! has uv; then
-  sub "uv (Python 3.12 without touching the system)"
-  fetch_script "https://astral.sh/uv/install.sh" "$tmp/uv.sh" && sh "$tmp/uv.sh" >/dev/null 2>&1 || die "uv install failed"
-fi
-if ! has bun; then
-  sub "bun (runs the agent)"
-  fetch_script "https://bun.sh/install" "$tmp/bun.sh" && bash "$tmp/bun.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"
-fi
+install_uv() { fetch_script "https://astral.sh/uv/install.sh" "$tmp/uv.sh" && sh "$tmp/uv.sh"; }
+has uv || step "uv (Python 3.12 without touching the system)" install_uv
+has uv || die "uv is required and did not install (see $LOGF)"
+# bun + the agent (the hands) are NOT installed here: `hannah hands on` does it on demand
 
 # ── 2. the brain is NOT installed here ────────────────────────────────────────────────
 # Where Hannah thinks (Ollama on this Mac, or a provider key) is chosen on the FIRST RUN, in
@@ -89,30 +108,32 @@ fi
 # you ask, and downloads the models with a progress bar.
 
 # ── 3. repos ──────────────────────────────────────────────────────────────────────────
-say "code → $ROOT"
-mkdir -p "$ROOT"
+export GIT_TERMINAL_PROMPT=0
 clone() {
-  if [ -d "$ROOT/$2/.git" ]; then (cd "$ROOT/$2" && git pull -q --ff-only 2>/dev/null || true); sub "$2 ✓ (updated)"
-  else git clone -q "https://github.com/${ORG}/$1.git" "$ROOT/$2" || die "could not clone ${ORG}/$1"; sub "$2 ✓"; fi
+  if [ -d "$ROOT/$2/.git" ]; then (cd "$ROOT/$2" && git pull -q --ff-only || true); echo "$2 updated"
+  else git clone -q "https://github.com/${ORG}/$1.git" "$ROOT/$2" || { echo "could not clone ${ORG}/$1"; return 1; }; echo "$2 cloned"; fi
 }
-if [ -d "$ROOT/.git" ]; then (cd "$ROOT" && git pull -q --ff-only 2>/dev/null || true); sub "workspace ✓ (updated)"
-else
-  rm -rf "$ROOT.tmp"; git clone -q "https://github.com/${ORG}/workspace.git" "$ROOT.tmp" || die "could not clone ${ORG}/workspace"
-  cp -a "$ROOT.tmp/." "$ROOT/" && rm -rf "$ROOT.tmp"; sub "workspace ✓"
-fi
-clone backend      hannah-backend
-clone motion-model hannah-motion-lab
-clone agent        hannah-agent
+clone_all() {
+  if [ -d "$ROOT/.git" ]; then (cd "$ROOT" && git pull -q --ff-only || true); echo "workspace updated"
+  else
+    rm -rf "$ROOT.tmp"; git clone -q "https://github.com/${ORG}/workspace.git" "$ROOT.tmp" || { echo "could not clone ${ORG}/workspace"; return 1; }
+    cp -a "$ROOT.tmp/." "$ROOT/" && rm -rf "$ROOT.tmp"; echo "workspace cloned"
+  fi
+  clone backend      hannah-backend
+  clone motion-model hannah-motion-lab
+  # the agent (hands) comes with `hannah hands on`; the app carries the frontend
+}
+step "code -> $ROOT" clone_all
 
 # ── 4. backend + sidecars (CPU) ───────────────────────────────────────────────────────
-say "backend"
-( cd "$ROOT/hannah-backend"
+backend_deps() {
+  cd "$ROOT/hannah-backend"
   # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
-  npm install --no-audit --no-fund
+  npm install --no-audit --no-fund --no-progress --loglevel=error
   # the SQLite binary must exist for THIS node: an earlier install under another node (or an npm
   # that blocks install scripts) leaves node_modules "complete" but without it, and npm install
   # then does nothing. prebuild-install fetches it in a second.
-  [ -e node_modules/better-sqlite3/build/Release/better_sqlite3.node ] || npm rebuild better-sqlite3 --no-audit --no-fund
+  [ -e node_modules/better-sqlite3/build/Release/better_sqlite3.node ] || npm rebuild better-sqlite3 --no-audit --no-fund --loglevel=error
   # node-pty ships prebuilds/darwin-*/spawn-helper at 0644 in its tarball; without +x every
   # terminal session dies with "posix_spawnp failed". The backend's postinstall does this too;
   # here it also covers a node_modules that predates it.
@@ -124,35 +145,37 @@ say "backend"
     tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
     sed -i '' "s|^#\{0,1\}[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
     chmod 600 .env
-    sub ".env created (edit it to enable tools/terminal/agent)"
-  else sub ".env kept"; fi
-  sub "python sidecars (voice, listening), CPU"
-  cd sidecar
+    echo ".env created"
+  else echo ".env kept"; fi
+}
+step "backend (Node dependencies)" backend_deps
+sidecar_venv() {
+  cd "$ROOT/hannah-backend/sidecar"
+  [ -x .venv/bin/python ] || uv venv .venv --python 3.12 || return 1
+  # onnxruntime-gpu has no macOS wheel (YOLO is opt-in through requirements-vision-yolo.txt)
+  sed -e 's/^onnxruntime-gpu==.*/onnxruntime/' requirements.txt > "$tmp/req-mac.txt"
+  uv pip install -q -p .venv/bin/python -r "$tmp/req-mac.txt"
+}
+step "voice and listening (Whisper, Kokoro), CPU" sidecar_venv
+# the watches (hannah-sense, :8007): its own venv; on macOS R1/R5 use pgrep and lsof (in the
+# system already), R6 (systemd) simply is not offered
+sense_venv() {
+  cd "$ROOT/hannah-backend/sidecar/sense"
+  [ -x .venv/bin/python ] || uv venv .venv --python 3.12 || return 1
+  uv pip install -q -p .venv/bin/python -r requirements.txt
+}
+step "watches (hannah-sense)" sense_venv
+motion_venv() {
+  cd "$ROOT/hannah-motion-lab"
   if [ ! -x .venv/bin/python ]; then
-    uv venv .venv --python 3.12 >/dev/null || die "uv could not create the venv"
-    # onnxruntime-gpu has no macOS wheel; the vision (YOLO) extras are not needed here
-    sed -e 's/^onnxruntime-gpu==.*/onnxruntime/' -e '/^ultralytics/d' -e '/^pillow/d' requirements.txt > "$tmp/req-mac.txt"
-    uv pip install -q -p .venv/bin/python -r "$tmp/req-mac.txt" || die "sidecar dependencies failed"
-  fi
-  sub "sidecars ✓" )
-( cd "$ROOT/hannah-backend/sidecar/sense"
-  # the watches (hannah-sense, :8007): its own venv; on macOS R1/R5 use pgrep and lsof (in the
-  # system already), R6 (systemd) simply is not offered
-  if [ ! -x .venv/bin/python ]; then
-    uv venv .venv --python 3.12 >/dev/null || die "uv could not create the sense venv"
-    uv pip install -q -p .venv/bin/python -r requirements.txt || die "sense dependencies failed"
-  fi
-  sub "hannah-sense ✓" )
-say "gesture model (text → motion, on Apple's GPU or the CPU)"
-( cd "$ROOT/hannah-motion-lab"
-  if [ ! -x .venv/bin/python ]; then
-    uv venv .venv --python 3.12 >/dev/null || die "uv could not create the motion venv"
+    uv venv .venv --python 3.12 || return 1
     # macOS: the PyPI torch build carries MPS (Apple Silicon) and CPU
-    uv pip install -q -p .venv/bin/python torch || die "torch install failed"
+    uv pip install -q -p .venv/bin/python torch || return 1
   fi
   # every run, not only on creation: a pull can bring a new serving dependency
-  uv pip install -q -p .venv/bin/python -r requirements-serve.txt || die "motion dependencies failed"
-  sub "motion-lab ok" )
+  uv pip install -q -p .venv/bin/python -r requirements-serve.txt
+}
+step "gesture model (text -> motion, on Apple's GPU or the CPU; the big one)" motion_venv
 say "gesture model (weights)"
 MODELS_API="https://api.github.com/repos/${ORG}/motion-model/releases/tags/models"
 code="$(curl -fsSL -o "$tmp/models.json" -w '%{http_code}' "$MODELS_API" 2>/dev/null)" || true
@@ -179,14 +202,7 @@ say "voice model"
   [ -f voices-v1.0.bin ]  || { sub "Kokoro voices (27 MB)";       fetch "$KOKORO/voices-v1.0.bin"  voices-v1.0.bin; }
   sub "voice ✓" )
 
-# ── 5. the hands (agent) ──────────────────────────────────────────────────────────────
-say "agent (the hands), off until you add an API key"
-if has bun; then
-  ( cd "$ROOT/hannah-agent"
-    bun install >/dev/null 2>&1
-    [ -f "$HOME/.config/hannah-agent/hannah-agent.jsonc" ] || scripts/install-profile.sh --openrouter >/dev/null 2>&1 || true
-    sub "agent ✓ (enable it later: AGENT_ENABLED=true + a key, in the ⚙ panel or .env)" )
-fi
+# (the hands, i.e. the agent + bun, are NOT installed here: `hannah hands on` does it on demand)
 
 # ── 6. the overlay app ────────────────────────────────────────────────────────────────
 say "overlay app (macOS $ARCH)"
@@ -268,14 +284,15 @@ cat <<EOF
   Other commands:
       hannah doctor     what is running
       hannah stop       shut everything down
+      hannah hands on   install and enable the hands (multi-step tasks; needs an API key)
+      hannah uninstall  remove it all (Ollama and its models stay)
+  Install log: ${LOGF}
 
   On macOS the voice runs on the CPU and the gestures on Apple's GPU (MPS) or the CPU: each
   sentence takes a bit longer to prepare than with an NVIDIA card, but she moves while she speaks.
   Nothing else was installed: no Ollama, no language model, that is her first question.
 
-  Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
-      TOOLS_ENABLED=true          let her act (internet, open apps, commands)
-      AGENT_ENABLED=true          multi-step tasks; needs an API key with credits
+  Let her act on this Mac (terminal, apps, commands): the switch in the overlay, ⚙ -> Manos.
 
   Docs: ${DOCS}
 

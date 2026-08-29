@@ -4,18 +4,22 @@
 #   curl -fsSL https://hannah-motion-lab.github.io/site/install.sh | bash
 #
 # What it sets up, in order (each step is skipped if already done, so re-running is safe):
-#   1. system packages (git, node, python, uv, unzip) via your distro's package manager
+#   1. system packages (git, python, uv, unzip) via your distro's package manager; Node 22 as a
+#      private copy if your system Node is not an LTS with prebuilt native modules
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      in your user folder if you say so, or a provider key), nothing of that runs from here
-#   3. the five repos under ~/Hannah-Motion (workspace, backend, frontend, motion-lab, agent)
-#   4. Node deps for backend/frontend, Python venvs for the sidecars (voice/vision, and the
-#      watch sidecar hannah-sense, which needs its own) and the gesture model
+#   3. the repos under ~/Hannah-Motion (workspace, backend, motion-lab, desktop)
+#   4. Node deps for the backend, Python venvs for the sidecars (voice, listening, the watch
+#      sidecar hannah-sense) and the gesture model
 #   5. the weights that are not in git: Kokoro voice (from upstream) and the trained
-#      text→motion model (from Hannah's GitHub release)
-#   6. bun + the agent (the "hands"), off by default until you add an API key
-#   7. the overlay AppImage, and the `hannah` launcher on your PATH
+#      text->motion model (from Hannah's GitHub release)
+#   6. the overlay AppImage (it carries the frontend), and the `hannah` launcher on your PATH
 #
-# Why not a single package: the stack is ~20 GB of Python/CUDA environments and models that
+# NOT installed until you ask: the agent (the "hands": `hannah hands on`) and the YOLO vision
+# provider (sidecar/requirements-vision-yolo.txt); both are off by default.
+# Output: one line per step; everything each step prints goes to ~/Hannah-Motion/.hannah-install.log.
+#
+# Why not a single package: the stack is several GB of Python/CUDA environments and models that
 # must be built and downloaded on YOUR machine (GPU-specific wheels, non-redistributable
 # models). The AppImage alone is only the window, it needs all of this behind it.
 set -euo pipefail
@@ -42,6 +46,28 @@ sub()  { printf '%s\n' "    ${C_DIM}$*${C_OFF}"; }
 warn() { printf '%s\n' "${C_WARN}warning:${C_OFF} $*" >&2; }
 die()  { printf '%s\n' "${C_ERR}error:${C_OFF} $*" >&2; exit 1; }
 has()  { command -v "$1" >/dev/null 2>&1; }
+# step <label> <function>: one line on the terminal, the function's whole output in the log.
+# A failed step shows the last lines of the log and the path, then stops. Downloads are NOT
+# run through here: their progress bar is the one thing worth seeing.
+LOGF=""
+step() {
+  local label="$1"; shift
+  { printf '\n### %s  %s\n' "$(date '+%F %T')" "$label"; } >>"$LOGF"
+  if [ -t 1 ]; then
+    printf '%s' "${C_DIM}==>${C_OFF} ${C_INFO}$label${C_OFF} "
+    "$@" >>"$LOGF" 2>&1 &
+    local pid=$! i=0 sp='|/-\\'
+    while kill -0 "$pid" 2>/dev/null; do printf '%s\b' "${sp:i++%4:1}"; sleep 0.15; done
+    local rc=0; wait "$pid" || rc=$?
+  else
+    printf '%s' "==> $label "
+    local rc=0; "$@" >>"$LOGF" 2>&1 || rc=$?
+  fi
+  if [ "$rc" -eq 0 ]; then printf '%s\n' "${C_DIM}ok${C_OFF}"; return 0; fi
+  printf '%s\n' "${C_ERR}FAILED${C_OFF}"
+  tail -n 25 "$LOGF" | sed 's/^/    /'
+  die "$label failed. Full log: $LOGF"
+}
 
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
   sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
@@ -61,6 +87,9 @@ case "$(uname -s -m)" in
   *) die "unsupported platform: $(uname -s -m)." ;;
 esac
 
+mkdir -p "$ROOT"
+LOGF="$ROOT/.hannah-install.log"; printf '### Hannah install %s\n' "$(date '+%F %T')" >>"$LOGF"
+
 # ── 1. system packages ────────────────────────────────────────────────────────────────
 say "system packages"
 if has pacman; then
@@ -75,8 +104,8 @@ fi
 missing=""
 for c in git python3 unzip curl; do has "$c" || missing="$missing $c"; done   # node: see below (private copy if needed)
 if [ -n "$missing" ] && [ -n "$PKG" ]; then
-  sub "installing:$missing (needs sudo)"
-  $PKG $PKGS
+  sub "installing:$missing (your distro's package manager, needs sudo)"
+  $PKG $PKGS   # visible on purpose: sudo asks for the password here
 fi
 has python3 || die "python3 is required (3.12+)."
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
@@ -102,11 +131,11 @@ node_lts_ok || die "node 20/22/24 is required (found $(node -v 2>/dev/null || ec
 # would otherwise run half a script). Their content is whatever the vendor serves today.
 fetch_script() { curl -fsSL --proto '=https' --tlsv1.2 -o "$2" "$1"; }
 # uv creates the venvs far faster than pip; install it to the user if the distro has none.
+install_uv() { fetch_script "https://astral.sh/uv/install.sh" "$tmp/uv-install.sh" && sh "$tmp/uv-install.sh"; }
 if ! has uv; then
-  sub "installing uv (fast Python installer) into ~/.local/bin"
-  fetch_script "https://astral.sh/uv/install.sh" "$tmp/uv-install.sh" && sh "$tmp/uv-install.sh" >/dev/null 2>&1 \
-    || warn "uv install failed; falling back to pip (slower)"
+  step "uv (fast Python installer, into ~/.local/bin)" install_uv || true
   export PATH="$HOME/.local/bin:$PATH"
+  has uv || warn "uv install failed; falling back to pip (slower)"
 fi
 NVIDIA=""
 if has nvidia-smi && nvidia-smi >/dev/null 2>&1; then NVIDIA=1; sub "NVIDIA GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)"
@@ -118,41 +147,41 @@ else warn "no NVIDIA GPU detected: the voice and gesture models will run on CPU 
 # you ask, and downloads the models with a progress bar. Nothing of that belongs in a script.
 
 # ── 3. repos ──────────────────────────────────────────────────────────────────────────
-say "repos → $ROOT"
-mkdir -p "$ROOT"
 # git must never prompt for a password in a piped install: fail fast with a clear message.
 export GIT_TERMINAL_PROMPT=0
 clone() {  # clone <repo> <dir>
-  if [ -d "$ROOT/$2/.git" ]; then (cd "$ROOT/$2" && git pull -q --ff-only 2>/dev/null || true); sub "$2 ✓ (updated)"
+  if [ -d "$ROOT/$2/.git" ]; then (cd "$ROOT/$2" && git pull -q --ff-only || true); echo "$2 updated"
   else
-    git clone -q "https://github.com/${ORG}/$1.git" "$ROOT/$2" 2>"$tmp/git.err" \
-      || die "could not clone ${ORG}/$1: $(tail -1 "$tmp/git.err"). If the repo is private you need access; otherwise check your connection."
-    sub "$2 ✓"
+    git clone -q "https://github.com/${ORG}/$1.git" "$ROOT/$2" \
+      || { echo "could not clone ${ORG}/$1. If the repo is private you need access; otherwise check your connection."; return 1; }
+    echo "$2 cloned"
   fi
 }
-# the workspace repo IS the root (launcher + docs); the others are its subfolders
-if [ -d "$ROOT/.git" ]; then (cd "$ROOT" && git pull -q --ff-only 2>/dev/null || true); sub "workspace ✓ (updated)"
-else
-  rm -rf "$ROOT.tmp"   # a previous run that died mid-clone leaves this behind
-  git clone -q "https://github.com/${ORG}/workspace.git" "$ROOT.tmp" 2>"$tmp/git.err" \
-    || die "could not clone ${ORG}/workspace: $(tail -1 "$tmp/git.err"). If the repo is private you need access; otherwise check your connection."
-  cp -a "$ROOT.tmp/." "$ROOT/" && rm -rf "$ROOT.tmp"; sub "workspace ✓"
-fi
-clone backend      hannah-backend
-clone frontend     hannah-frontend
-clone motion-model hannah-motion-lab
-clone agent        hannah-agent
-clone desktop      hannah-desktop
+clone_all() {
+  # the workspace repo IS the root (launcher + docs); the others are its subfolders
+  if [ -d "$ROOT/.git" ]; then (cd "$ROOT" && git pull -q --ff-only || true); echo "workspace updated"
+  else
+    rm -rf "$ROOT.tmp"   # a previous run that died mid-clone leaves this behind
+    git clone -q "https://github.com/${ORG}/workspace.git" "$ROOT.tmp" || { echo "could not clone ${ORG}/workspace"; return 1; }
+    cp -a "$ROOT.tmp/." "$ROOT/" && rm -rf "$ROOT.tmp"; echo "workspace cloned"
+  fi
+  # the frontend is NOT cloned: the AppImage carries it (HANNAH_DEV=1 needs the repo, see SETUP.md);
+  # the agent (hands) comes with `hannah hands on`
+  clone backend      hannah-backend
+  clone motion-model hannah-motion-lab
+  clone desktop      hannah-desktop
+}
+step "code -> $ROOT" clone_all
 
 # ── 4. dependencies ───────────────────────────────────────────────────────────────────
-say "backend"
-( cd "$ROOT/hannah-backend"
+backend_deps() {
+  cd "$ROOT/hannah-backend"
   # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
-  npm install --no-audit --no-fund
+  npm install --no-audit --no-fund --no-progress --loglevel=error
   # the SQLite binary must exist for THIS node: an earlier install under another node (or an npm
   # that blocks install scripts) leaves node_modules "complete" but without it, and npm install
   # then does nothing. prebuild-install fetches it in a second.
-  [ -e node_modules/better-sqlite3/build/Release/better_sqlite3.node ] || npm rebuild better-sqlite3 --no-audit --no-fund
+  [ -e node_modules/better-sqlite3/build/Release/better_sqlite3.node ] || npm rebuild better-sqlite3 --no-audit --no-fund --loglevel=error
   if [ ! -f .env ]; then
     cp .env.example .env
     # defaults that make it work on the first try: the brain that is best at actions, and
@@ -162,39 +191,44 @@ say "backend"
     tok="$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
     sed -i "s|^#\?[[:space:]]*HANNAH_AGENT_TOKEN=.*|HANNAH_AGENT_TOKEN=$tok|" .env
     chmod 600 .env
-    sub ".env created (edit it to enable tools/terminal/agent)"
-  else sub ".env kept"; fi
-  sub "python sidecars (voice, listening, vision)"
-  cd sidecar
+    echo ".env created"
+  else echo ".env kept"; fi
+}
+step "backend (Node dependencies)" backend_deps
+# the voice sidecars: faster-whisper + Kokoro. No torch and no YOLO here: the vision provider
+# (VISION_PROVIDER=yolo) is opt-in through sidecar/requirements-vision-yolo.txt, and the CUDA
+# libs Kokoro/Whisper need are preloaded from the gesture model's venv (sidecar/common.py).
+sidecar_venv() {
+  cd "$ROOT/hannah-backend/sidecar"
   if [ ! -x .venv/bin/python ]; then
-    if has uv; then uv venv .venv --python 3.12 >/dev/null 2>&1 || uv venv .venv >/dev/null; uv pip install -q -r requirements.txt
-    else python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt; fi
+    if has uv; then uv venv .venv --python 3.12 || uv venv .venv
+    else python3 -m venv .venv; fi
   fi
-  sub "sidecars ✓"
-  # hannah-sense (:8007, the watches) gets its OWN venv, with --system-site-packages so the
-  # screen and AT-SPI rungs can reach `gi`/`dbus`, which are distro packages. It is NOT the venv
-  # above: that one pins numpy and onnxruntime-gpu for faster-whisper, Kokoro and YOLO, and
-  # letting the system site-packages in would break the voice at runtime and in silence.
-  sub "watch sidecar (hannah-sense)"
-  cd sense
+  # every run: a pull can change requirements.txt (a no-op when nothing changed)
+  if has uv; then uv pip install -q -p .venv/bin/python -r requirements.txt; else .venv/bin/pip install -q -r requirements.txt; fi
+}
+step "voice and listening (Whisper, Kokoro)" sidecar_venv
+# hannah-sense (:8007, the watches) gets its OWN venv, with --system-site-packages so the
+# screen and AT-SPI rungs can reach `gi`/`dbus`, which are distro packages. It is NOT the venv
+# above: that one pins numpy and onnxruntime-gpu for faster-whisper and Kokoro, and letting the
+# system site-packages in would break the voice at runtime and in silence.
+sense_venv() {
+  cd "$ROOT/hannah-backend/sidecar/sense"
   if [ ! -x .venv/bin/python ]; then
-    if has uv; then uv venv .venv --python 3.12 --system-site-packages >/dev/null 2>&1 || uv venv .venv --system-site-packages >/dev/null; uv pip install -q -r requirements.txt
-    else python3 -m venv --system-site-packages .venv && .venv/bin/pip install -q -r requirements.txt; fi
+    if has uv; then uv venv .venv --python 3.12 --system-site-packages || uv venv .venv --system-site-packages
+    else python3 -m venv --system-site-packages .venv; fi
   fi
-  sub "hannah-sense ✓"
-)
-say "frontend"
-( cd "$ROOT/hannah-frontend"
-  npm install --legacy-peer-deps --no-audit --no-fund   # the flag is NOT optional
-  sub "frontend ✓" )
-say "gesture model (text → motion)"
-( cd "$ROOT/hannah-motion-lab"
+  if has uv; then uv pip install -q -p .venv/bin/python -r requirements.txt; else .venv/bin/pip install -q -r requirements.txt; fi
+}
+step "watches (hannah-sense)" sense_venv
+motion_venv() {
+  cd "$ROOT/hannah-motion-lab"
   if [ ! -x .venv/bin/python ]; then
     if has uv; then
-      uv venv .venv --python 3.12 >/dev/null 2>&1 || uv venv .venv >/dev/null
+      uv venv .venv --python 3.12 || uv venv .venv
       # torch must come from the CUDA 12.8 index (RTX 50xx needs it; older GPUs work too)
-      if [ -n "$NVIDIA" ]; then uv pip install -q torch --index-url https://download.pytorch.org/whl/cu128
-      else uv pip install -q torch --index-url https://download.pytorch.org/whl/cpu; fi
+      if [ -n "$NVIDIA" ]; then uv pip install -q -p .venv/bin/python torch --index-url https://download.pytorch.org/whl/cu128
+      else uv pip install -q -p .venv/bin/python torch --index-url https://download.pytorch.org/whl/cpu; fi
     else
       python3 -m venv .venv
       if [ -n "$NVIDIA" ]; then .venv/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cu128
@@ -203,7 +237,8 @@ say "gesture model (text → motion)"
   fi
   # every run, not only on creation: a pull can bring a new serving dependency
   if has uv; then uv pip install -q -p .venv/bin/python -r requirements-serve.txt; else .venv/bin/pip install -q -r requirements-serve.txt; fi
-  sub "motion-lab ✓" )
+}
+step "gesture model (text -> motion, torch $([ -n "$NVIDIA" ] && echo CUDA || echo CPU); the big one)" motion_venv
 
 # ── 5. weights that are not in git ────────────────────────────────────────────────────
 say "model weights"
@@ -246,18 +281,8 @@ msums="$(masset SHA256SUMS)"; [ -n "$msums" ] && curl -fsSL -o "$tmp/SHA256SUMS"
   sub "gestures ✓" )
 [ -f "$tmp/SHA256SUMS.app" ] && mv -f "$tmp/SHA256SUMS.app" "$tmp/SHA256SUMS"
 
-# ── 6. the hands (agent) ──────────────────────────────────────────────────────────────
-say "agent (the hands), off until you add an API key"
-export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"
-if ! has bun; then sub "installing bun"; fetch_script "https://bun.sh/install" "$tmp/bun-install.sh" && bash "$tmp/bun-install.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"; fi
-if has bun; then
-  ( cd "$ROOT/hannah-agent"
-    bun install >/dev/null 2>&1
-    [ -f "$HOME/.config/hannah-agent/hannah-agent.jsonc" ] || scripts/install-profile.sh --openrouter >/dev/null 2>&1 || true
-    sub "agent ✓ (enable it later: AGENT_ENABLED=true + an OpenRouter key, in the ⚙ panel or .env)" )
-fi
-
-# ── 7. the overlay + launcher on PATH ─────────────────────────────────────────────────
+# ── 6. the overlay + launcher on PATH ─────────────────────────────────────────────────
+# (the hands, i.e. the agent + bun, are NOT installed here: `hannah hands on` does it on demand)
 say "overlay (AppImage)"
 url="$(asset '.AppImage')"; [ -n "$url" ] || die "the latest release has no AppImage."
 mkdir -p "$BIN_DIR"
@@ -285,12 +310,11 @@ cat <<EOF
   Other commands:
       hannah doctor     what works on this desktop and what is missing
       hannah stop       shut everything down and free the GPU
+      hannah hands on   install and enable the hands (multi-step tasks; needs an API key)
+      hannah uninstall  remove it all (Ollama and its models stay)
 
-  Optional, in ${ROOT}/hannah-backend/.env (or the ⚙ panel in the overlay):
-      TOOLS_ENABLED=true          let her act (internet, open apps, commands)
-      TOOLS_SYSTEM_CONTROL=true   a REAL terminal, read the security note first
-      AGENT_ENABLED=true          multi-step tasks; needs an OpenRouter key with credits
-
+  Let her act on this PC (terminal, apps, commands): the switch in the overlay, ⚙ -> Manos.
+  Install log: ${LOGF}
   Docs: ${DOCS}
   Overlay won't stay on top / FUSE error? see the README, or run once with:
       ${BIN_DIR}/Hannah.AppImage --appimage-extract-and-run

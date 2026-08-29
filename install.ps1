@@ -5,7 +5,7 @@
 # Everything is installed for YOUR user only, nothing touches Program Files or the registry
 # beyond your own PATH:
 #   1. tools as portable copies in %USERPROFILE%\Hannah-Motion\.tools: Git (MinGit), Node 22;
-#      uv (Python 3.12) and bun (the agent) in your profile
+#      uv (Python 3.12) in your profile. Not bun: `hannah hands on` brings the agent on demand
 #   2. NOT the brain: on first run Hannah asks where she should think (Ollama here, installed
 #      per-user if you say so, or a provider key)
 #   3. clones the Hannah repos into %USERPROFILE%\Hannah-Motion
@@ -14,6 +14,7 @@
 #   5. the overlay app from the latest release (per-user install, silent)
 #   6. a `hannah` command: `hannah` brings everything up and opens the window,
 #      `hannah stop` shuts it down, `hannah doctor` tells you what is running.
+#   Output: one line per step; the details go to %USERPROFILE%\Hannah-Motion\.hannah-install.log
 # If PowerShell refuses to run scripts:  Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 function Install-Hannah {
@@ -37,6 +38,21 @@ function Install-Hannah {
   function Die($m)  { Write-Host "error: $m" -ForegroundColor Red; throw $m }
   function Has($c)  { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
   function Fetch($url, $out) { Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing -ErrorAction Stop }
+  # Invoke-Step 'label' { block }: one line on the console, the block's whole output in the log.
+  # A failed step shows the last lines of the log and the path, then stops. Downloads keep
+  # their own progress; they are not run through here.
+  $script:LogF = $null
+  function Invoke-Step($label, [scriptblock]$block) {
+    Add-Content $script:LogF "`n### $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $label"
+    Write-Host "==> $label " -ForegroundColor Green -NoNewline
+    $global:LASTEXITCODE = 0
+    $failed = $false
+    try { & $block *>> $script:LogF; if ($LASTEXITCODE) { $failed = $true } } catch { Add-Content $script:LogF "$_"; $failed = $true }
+    if (-not $failed) { Write-Host 'ok' -ForegroundColor DarkGray; return }
+    Write-Host 'FAILED' -ForegroundColor Red
+    Get-Content $script:LogF -Tail 25 | ForEach-Object { Write-Host "    $_" }
+    Die "$label failed. Full log: $script:LogF"
+  }
   function Add-UserPath($dir) {
     if (-not (Test-Path $dir)) { return }
     $cur = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -46,6 +62,8 @@ function Install-Hannah {
 
   if (-not [Environment]::Is64BitOperatingSystem) { Die 'Hannah needs 64-bit Windows.' }
   New-Item -ItemType Directory -Force -Path $Root, $Tools | Out-Null
+  $script:LogF = Join-Path $Root '.hannah-install.log'
+  Add-Content $script:LogF "### Hannah install $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
   $tmp = Join-Path ([IO.Path]::GetTempPath()) ("hannah-" + [guid]::NewGuid().ToString('N'))
   New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 
@@ -76,51 +94,48 @@ function Install-Hannah {
     Add-UserPath "$Tools\node"
   }
   if (-not (Has uv)) {
-    Sub 'uv (Python 3.12 without touching the system)'
-    Fetch 'https://astral.sh/uv/install.ps1' "$tmp\uv.ps1"
-    & powershell -NoProfile -ExecutionPolicy Bypass -File "$tmp\uv.ps1" | Out-Null
+    Invoke-Step 'uv (Python 3.12 without touching the system)' {
+      Fetch 'https://astral.sh/uv/install.ps1' "$tmp\uv.ps1"
+      & powershell -NoProfile -ExecutionPolicy Bypass -File "$tmp\uv.ps1"
+    }
     Add-UserPath (Join-Path $env:USERPROFILE '.local\bin')
   }
-  if (-not (Has bun)) {
-    Sub 'bun (runs the agent)'
-    try {
-      Fetch 'https://bun.sh/install.ps1' "$tmp\bun.ps1"
-      & powershell -NoProfile -ExecutionPolicy Bypass -File "$tmp\bun.ps1" | Out-Null
-      Add-UserPath (Join-Path $env:USERPROFILE '.bun\bin')
-    } catch { Warn 'bun install failed; the agent will not be available' }
-  }
+  # bun + the agent (the hands) are NOT installed here: `hannah hands on` does it on demand
   # -- 2. the brain is NOT installed here ---------------------------------------------
   # Where Hannah thinks (Ollama on this PC, or a provider key) is chosen on the FIRST RUN, in
   # her window: she detects Ollama if you already have it, installs it per-user if you ask,
   # and downloads the models with a progress bar.
 
   # -- 3. repos ------------------------------------------------------------------------
-  Say "code -> $Root"
   function Clone($repo, $dir) {
     $d = Join-Path $Root $dir
-    if (Test-Path (Join-Path $d '.git')) { Push-Location $d; git pull -q --ff-only 2>$null; Pop-Location; Sub "$dir ok (updated)" }
-    else { git clone -q "https://github.com/$Org/$repo.git" $d; if ($LASTEXITCODE) { Die "could not clone $Org/$repo" }; Sub "$dir ok" }
+    if (Test-Path (Join-Path $d '.git')) { Push-Location $d; git pull -q --ff-only 2>$null; Pop-Location; Write-Output "$dir updated" }
+    else { git clone -q "https://github.com/$Org/$repo.git" $d; if ($LASTEXITCODE) { throw "could not clone $Org/$repo" }; Write-Output "$dir cloned" }
   }
-  if (Test-Path (Join-Path $Root '.git')) { Push-Location $Root; git pull -q --ff-only 2>$null; Pop-Location; Sub 'workspace ok (updated)' }
-  else {
-    if (Test-Path "$Root.tmp") { Remove-Item "$Root.tmp" -Recurse -Force }
-    git clone -q "https://github.com/$Org/workspace.git" "$Root.tmp"; if ($LASTEXITCODE) { Die "could not clone $Org/workspace" }
-    Copy-Item "$Root.tmp\*" $Root -Recurse -Force; Remove-Item "$Root.tmp" -Recurse -Force; Sub 'workspace ok' -ErrorAction Stop
+  Invoke-Step "code -> $Root" {
+    if (Test-Path (Join-Path $Root '.git')) { Push-Location $Root; git pull -q --ff-only 2>$null; Pop-Location; Write-Output 'workspace updated' }
+    else {
+      if (Test-Path "$Root.tmp") { Remove-Item "$Root.tmp" -Recurse -Force }
+      git clone -q "https://github.com/$Org/workspace.git" "$Root.tmp"; if ($LASTEXITCODE) { throw "could not clone $Org/workspace" }
+      Copy-Item "$Root.tmp\*" $Root -Recurse -Force; Remove-Item "$Root.tmp" -Recurse -Force; Write-Output 'workspace cloned'
+    }
+    Clone backend      hannah-backend
+    Clone motion-model hannah-motion-lab
+    # the agent (hands) comes with `hannah hands on`; the app carries the frontend
+    $global:LASTEXITCODE = 0
   }
-  Clone backend      hannah-backend
-  Clone motion-model hannah-motion-lab
-  Clone agent        hannah-agent
   Add-UserPath $Root   # `hannah` (hannah.cmd) is usable from a NEW terminal from this point on
 
   # -- 4. backend + sidecars (CPU) -----------------------------------------------------
-  Say 'backend'
   $back = Join-Path $Root 'hannah-backend'
   Push-Location $back
-  # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
-  npm install --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'npm install failed in hannah-backend' }
-  # the SQLite binary must exist for THIS node: an earlier install under another node leaves
-  # node_modules "complete" without it and npm install then does nothing
-  if (-not (Test-Path 'node_modules\better-sqlite3\build\Release\better_sqlite3.node')) { npm rebuild better-sqlite3 --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'better-sqlite3 has no binary for this node' } }
+  Invoke-Step 'backend (Node dependencies)' {
+    # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
+    npm install --no-audit --no-fund --no-progress --loglevel=error; if ($LASTEXITCODE) { throw 'npm install failed in hannah-backend' }
+    # the SQLite binary must exist for THIS node: an earlier install under another node leaves
+    # node_modules "complete" without it and npm install then does nothing
+    if (-not (Test-Path 'node_modules\better-sqlite3\build\Release\better_sqlite3.node')) { npm rebuild better-sqlite3 --no-audit --no-fund --loglevel=error; if ($LASTEXITCODE) { throw 'better-sqlite3 has no binary for this node' } }
+  }
   if (-not (Test-Path '.env')) {
     $envText = Get-Content '.env.example' -Raw
     $envText = $envText -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=qwen2.5:7b' -replace '(?m)^ASR_PROVIDER=.*$', 'ASR_PROVIDER=local'
@@ -129,37 +144,34 @@ function Install-Hannah {
     Set-Content '.env' $envText -NoNewline
     Sub '.env created (edit it to enable tools/terminal/agent)'
   } else { Sub '.env kept' }
-  Sub 'python sidecars (voice, listening), CPU'
   Push-Location 'sidecar'
-  if (-not (Test-Path '.venv\Scripts\python.exe')) {
-    uv venv .venv --python 3.12 | Out-Null; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'uv could not create the venv' }
-    # onnxruntime-gpu needs CUDA libs we do not ship here; the vision (YOLO) extras are not needed
-    (Get-Content 'requirements.txt') -replace '^onnxruntime-gpu==.*$', 'onnxruntime' | Where-Object { $_ -notmatch '^(ultralytics|pillow)' } | Set-Content "$tmp\req-win.txt"
-    uv pip install -q -p .venv\Scripts\python.exe -r "$tmp\req-win.txt"; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'sidecar dependencies failed' }
+  Invoke-Step 'voice and listening (Whisper, Kokoro), CPU' {
+    if (-not (Test-Path '.venv\Scripts\python.exe')) { uv venv .venv --python 3.12; if ($LASTEXITCODE) { throw 'uv could not create the venv' } }
+    # onnxruntime-gpu needs CUDA libs we do not ship here (YOLO is opt-in through requirements-vision-yolo.txt)
+    (Get-Content 'requirements.txt') -replace '^onnxruntime-gpu==.*$', 'onnxruntime' | Set-Content "$tmp\req-win.txt"
+    uv pip install -q -p .venv\Scripts\python.exe -r "$tmp\req-win.txt"; if ($LASTEXITCODE) { throw 'sidecar dependencies failed' }
   }
   Pop-Location
-  Sub 'sidecars ok'
   # the watches (hannah-sense, :8007): its own venv; on Windows R1/R5 use psutil (no pgrep/ss)
   Push-Location 'sidecar\sense'
-  if (-not (Test-Path '.venv\Scripts\python.exe')) {
-    uv venv .venv --python 3.12 | Out-Null; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'uv could not create the sense venv' }
-    uv pip install -q -p .venv\Scripts\python.exe -r requirements.txt; if ($LASTEXITCODE) { Pop-Location; Pop-Location; Die 'sense dependencies failed' }
+  Invoke-Step 'watches (hannah-sense)' {
+    if (-not (Test-Path '.venv\Scripts\python.exe')) { uv venv .venv --python 3.12; if ($LASTEXITCODE) { throw 'uv could not create the sense venv' } }
+    uv pip install -q -p .venv\Scripts\python.exe -r requirements.txt; if ($LASTEXITCODE) { throw 'sense dependencies failed' }
   }
   Pop-Location
-  Sub 'hannah-sense ok'
-  Say 'gesture model (text -> motion)'
   $lab = Join-Path $Root 'hannah-motion-lab'
   Push-Location $lab
-  if (-not (Test-Path '.venv\Scripts\python.exe')) {
-    uv venv .venv --python 3.12 | Out-Null; if ($LASTEXITCODE) { Pop-Location; Die 'uv could not create the motion venv' }
-    $nvidia = [bool](Get-Command nvidia-smi -ErrorAction SilentlyContinue)
-    if ($nvidia) { Sub 'torch (CUDA 12.8)'; uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cu128 }
-    else { Sub 'torch (CPU)'; uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cpu }
-    if ($LASTEXITCODE) { Pop-Location; Die 'torch install failed' }
+  $nvidia = [bool](Get-Command nvidia-smi -ErrorAction SilentlyContinue)
+  Invoke-Step "gesture model (text -> motion, torch $(if ($nvidia) { 'CUDA' } else { 'CPU' }); the big one)" {
+    if (-not (Test-Path '.venv\Scripts\python.exe')) {
+      uv venv .venv --python 3.12; if ($LASTEXITCODE) { throw 'uv could not create the motion venv' }
+      if ($nvidia) { uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cu128 }
+      else { uv pip install -q -p .venv\Scripts\python.exe torch --index-url https://download.pytorch.org/whl/cpu }
+      if ($LASTEXITCODE) { throw 'torch install failed' }
+    }
+    # every run, not only on creation: a pull can bring a new serving dependency
+    uv pip install -q -p .venv\Scripts\python.exe -r requirements-serve.txt; if ($LASTEXITCODE) { throw 'motion dependencies failed' }
   }
-  # every run, not only on creation: a pull can bring a new serving dependency
-  uv pip install -q -p .venv\Scripts\python.exe -r requirements-serve.txt; if ($LASTEXITCODE) { Pop-Location; Die 'motion dependencies failed' }
-  Sub 'motion-lab ok'
   $mrel = Invoke-RestMethod "https://api.github.com/repos/$Org/motion-model/releases/tags/models" -UseBasicParsing -ErrorAction Stop
   $msums = $mrel.assets | Where-Object { $_.name -eq 'SHA256SUMS' } | Select-Object -First 1
   $sumText = if ($msums) { (Invoke-WebRequest $msums.browser_download_url -UseBasicParsing -ErrorAction Stop).Content } else { '' }
@@ -188,14 +200,7 @@ function Install-Hannah {
   Sub 'voice ok'
   Pop-Location
 
-  # -- 5. the hands (agent) ------------------------------------------------------------
-  Say 'agent (the hands), off until you add an API key'
-  if (Has bun) {
-    Push-Location (Join-Path $Root 'hannah-agent')
-    try { bun install 2>&1 | Out-Null } catch { Warn "bun install failed: $($_.Exception.Message)" }
-    Pop-Location
-    Sub 'agent ok (enable it later: AGENT_ENABLED=true + a key, in the (settings) panel or .env)'
-  }
+  # (the hands, i.e. the agent + bun, are NOT installed here: `hannah hands on` does it on demand)
 
   # -- 6. the overlay app (per-user, silent) -------------------------------------------
   Say 'overlay app'
@@ -252,7 +257,8 @@ function Install-Hannah {
   Write-Host ''
   Write-Host '      hannah' -ForegroundColor Yellow
   Write-Host ''
-  Write-Host '  Other commands:   hannah doctor   -   hannah stop'
+  Write-Host '  Other commands:   hannah doctor   -   hannah stop   -   hannah hands on   -   hannah uninstall'
+  Write-Host "  Install log: $script:LogF"
   Write-Host ''
   Write-Host '  Nothing else was installed: no Ollama, no language model, that is her first question.'
   Write-Host '  Voice and listening run on the CPU; the gestures on your NVIDIA card if there is one, else on the CPU'
