@@ -113,7 +113,8 @@ function Install-Hannah {
   Say 'backend'
   $back = Join-Path $Root 'hannah-backend'
   Push-Location $back
-  if (-not (Test-Path 'node_modules')) { npm install --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'npm install failed in hannah-backend' } }
+  # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
+  npm install --no-audit --no-fund; if ($LASTEXITCODE) { Pop-Location; Die 'npm install failed in hannah-backend' }
   if (-not (Test-Path '.env')) {
     $envText = Get-Content '.env.example' -Raw
     $envText = $envText -replace '(?m)^LLM_MODEL=.*$', 'LLM_MODEL=qwen2.5:7b' -replace '(?m)^ASR_PROVIDER=.*$', 'ASR_PROVIDER=local'
@@ -185,7 +186,7 @@ function Install-Hannah {
   Say 'agent (the hands), off until you add an API key'
   if (Has bun) {
     Push-Location (Join-Path $Root 'hannah-agent')
-    try { if (-not (Test-Path 'node_modules')) { bun install 2>&1 | Out-Null } } catch { Warn "bun install failed: $($_.Exception.Message)" }
+    try { bun install 2>&1 | Out-Null } catch { Warn "bun install failed: $($_.Exception.Message)" }
     Pop-Location
     Sub 'agent ok (enable it later: AGENT_ENABLED=true + a key, in the (settings) panel or .env)'
   }

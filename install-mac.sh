@@ -104,7 +104,8 @@ clone agent        hannah-agent
 # ── 4. backend + sidecars (CPU) ───────────────────────────────────────────────────────
 say "backend"
 ( cd "$ROOT/hannah-backend"
-  [ -d node_modules ] || npm install --no-audit --no-fund
+  # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
+  npm install --no-audit --no-fund
   if [ ! -f .env ]; then
     cp .env.example .env
     # local listening; the brain is chosen on first run
@@ -171,7 +172,7 @@ say "voice model"
 say "agent (the hands), off until you add an API key"
 if has bun; then
   ( cd "$ROOT/hannah-agent"
-    [ -d node_modules ] || bun install >/dev/null 2>&1
+    bun install >/dev/null 2>&1
     [ -f "$HOME/.config/hannah-agent/hannah-agent.jsonc" ] || scripts/install-profile.sh --openrouter >/dev/null 2>&1 || true
     sub "agent ✓ (enable it later: AGENT_ENABLED=true + a key, in the ⚙ panel or .env)" )
 fi

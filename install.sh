@@ -131,7 +131,8 @@ clone desktop      hannah-desktop
 # ── 4. dependencies ───────────────────────────────────────────────────────────────────
 say "backend"
 ( cd "$ROOT/hannah-backend"
-  [ -d node_modules ] || npm install --no-audit --no-fund
+  # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
+  npm install --no-audit --no-fund
   if [ ! -f .env ]; then
     cp .env.example .env
     # defaults that make it work on the first try: the brain that is best at actions, and
@@ -164,7 +165,7 @@ say "backend"
 )
 say "frontend"
 ( cd "$ROOT/hannah-frontend"
-  [ -d node_modules ] || npm install --legacy-peer-deps --no-audit --no-fund   # the flag is NOT optional
+  npm install --legacy-peer-deps --no-audit --no-fund   # the flag is NOT optional
   sub "frontend ✓" )
 say "gesture model (text → motion)"
 ( cd "$ROOT/hannah-motion-lab"
@@ -231,7 +232,7 @@ export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"
 if ! has bun; then sub "installing bun"; fetch_script "https://bun.sh/install" "$tmp/bun-install.sh" && bash "$tmp/bun-install.sh" >/dev/null 2>&1 || warn "bun install failed; the agent will not be available"; fi
 if has bun; then
   ( cd "$ROOT/hannah-agent"
-    [ -d node_modules ] || bun install >/dev/null 2>&1
+    bun install >/dev/null 2>&1
     [ -f "$HOME/.config/hannah-agent/hannah-agent.jsonc" ] || scripts/install-profile.sh --openrouter >/dev/null 2>&1 || true
     sub "agent ✓ (enable it later: AGENT_ENABLED=true + an OpenRouter key, in the ⚙ panel or .env)" )
 fi
