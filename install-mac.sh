@@ -10,7 +10,8 @@
 #   3. clones the Hannah repos into ~/Hannah-Motion
 #   4. backend + voice/listening sidecars on the CPU, the watches (hannah-sense)
 #      and the gesture model (text → motion) on Apple's GPU (MPS) or the CPU
-#   5. the overlay app from the latest release (unsigned: the quarantine flag is removed)
+#   5. the overlay app from the latest release (no Apple certificate: the quarantine flag is
+#      removed AND the bundle is ad-hoc signed, or macOS never grants it the mic/camera)
 #   6. a `hannah` command on your PATH: `hannah` brings everything up and opens the window,
 #      `hannah stop` shuts it down, `hannah doctor` tells you what is running.
 # Needs: git (Xcode Command Line Tools, the ONE thing that may ask an admin) and curl.
@@ -106,6 +107,10 @@ say "backend"
 ( cd "$ROOT/hannah-backend"
   # always run: a failed install leaves a partial node_modules, and npm is a fast no-op when complete
   npm install --no-audit --no-fund
+  # node-pty ships prebuilds/darwin-*/spawn-helper at 0644 in its tarball; without +x every
+  # terminal session dies with "posix_spawnp failed". The backend's postinstall does this too;
+  # here it also covers a node_modules that predates it.
+  chmod +x node_modules/node-pty/prebuilds/darwin-*/spawn-helper 2>/dev/null || true
   if [ ! -f .env ]; then
     cp .env.example .env
     # local listening; the brain is chosen on first run
@@ -201,6 +206,40 @@ else
   # unsigned build: without this macOS says the app "is damaged"/"can't be opened"
   xattr -dr com.apple.quarantine "$HOME/Applications/Hannah.app" 2>/dev/null || true
   sub "Hannah.app → ~/Applications ✓"
+fi
+# ── 6b. the microphone: ad-hoc signature ──────────────────────────────────────────────
+# macOS keys mic/camera access to the entitlement com.apple.security.device.audio-input, and
+# entitlements only exist inside a code signature: an unsigned bundle never even gets the
+# permission prompt (tccd: "Policy disallows prompt"), so Hannah is deaf with no error anywhere.
+# Releases from 1.0.15 come signed ad-hoc with the entitlements; this re-signs in place so older
+# DMGs work too. Ad-hoc needs no Apple account, no certificate, no admin, and re-signing is
+# idempotent. OUTSIDE the version check on purpose: an app already at this version must be
+# signed as well.
+if [ -d "$HOME/Applications/Hannah.app" ] && has codesign; then
+  say "microphone + camera (ad-hoc signature)"
+  cat > "$tmp/hannah.entitlements" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.security.device.audio-input</key><true/>
+  <key>com.apple.security.device.camera</key><true/>
+  <key>com.apple.security.cs.allow-jit</key><true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/>
+  <key>com.apple.security.cs.disable-library-validation</key><true/>
+</dict>
+</plist>
+PLIST
+  # inside-out: the nested helpers and frameworks first, the outer bundle last
+  find "$HOME/Applications/Hannah.app/Contents/Frameworks" -depth \
+       \( -name '*.app' -o -name '*.framework' -o -name '*.dylib' -o -name '*.node' \) \
+       -exec codesign --force --sign - --options runtime --entitlements "$tmp/hannah.entitlements" {} \; 2>/dev/null || true
+  codesign --force --sign - --options runtime --entitlements "$tmp/hannah.entitlements" "$HOME/Applications/Hannah.app" 2>/dev/null || true
+  if codesign -d --entitlements - "$HOME/Applications/Hannah.app" 2>/dev/null | grep -q 'security\.device\.audio-input'; then
+    sub "signed ✓ (macOS can now ask for the mic and the camera)"
+  else
+    warn "could not sign Hannah.app: macOS will never ask for the microphone. See ${DOCS}"
+  fi
 fi
 
 # ── 7. the launcher ───────────────────────────────────────────────────────────────────
