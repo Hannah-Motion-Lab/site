@@ -25,6 +25,7 @@
   <meta name="twitter:description" content="Open source. Runs on your own PC. Talks, moves while she speaks, and acts on your computer with your permission.">
   <meta name="twitter:image" content="https://vanthlabs.org/assets/app.jpg">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" as="image" href="assets/app.webp" fetchpriority="high">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <script type="application/ld+json">
   {
@@ -120,7 +121,7 @@
       <p class="hero-fine">Free &middot; MIT &middot; one command &middot; nothing leaves your machine by default</p>
     </div>
     <figure class="hero-shot">
-      <video id="demo" poster="assets/app.jpg" width="1600" height="1000" autoplay muted loop playsinline preload="metadata"
+      <video id="demo" poster="assets/app.webp" width="1600" height="1000" autoplay muted loop playsinline preload="metadata"
         aria-label="30-second demo of Hannah: she greets, sorts a downloads folder after asking permission, moves to the other screen, and the terminal panel shows what ran">
       </video>
     </figure>
@@ -195,7 +196,7 @@
       <article id="c-hands" class="cap">
         <h2>Hands</h2>
         <p>Turn on tools and she opens apps, runs commands in a real terminal and searches the web. Give her a job with several steps, like "organize my downloads by type", and a separate agent does it, with risk-tiered approvals, an audit log and undo. Anything destructive asks you first; anything high-risk needs the button, not just your voice.</p>
-        <figure class="wide-shot"><img src="assets/terminal.jpg" width="1100" height="340" alt="Hannah's window split with a real terminal panel at the bottom" loading="lazy"><figcaption>The terminal panel: a real shell, and every command the agent runs echoed there too</figcaption></figure>
+        <figure class="wide-shot"><picture><source type="image/webp" srcset="assets/terminal.webp"><img src="assets/terminal.jpg" width="1100" height="340" alt="Hannah's window split with a real terminal panel at the bottom" loading="lazy"></picture><figcaption>The terminal panel: a real shell, and every command the agent runs echoed there too</figcaption></figure>
         <details class="how">
           <summary>How she decides who does what</summary>
           <dl class="facts">
@@ -216,8 +217,8 @@
         </div>
         <p class="src">Measured on a text turn, local stack, RTX 5070 Ti. The first sentence waits for its own audio to synthesize; the rest stream behind it.</p>
         <div class="shots-2">
-          <figure><img src="assets/gesture.jpg" width="420" height="580" alt="Hannah mid-sentence, one hand raised to her chest" loading="lazy"><figcaption>A gesture generated from the sentence she is saying</figcaption></figure>
-          <figure><img src="assets/portrait.jpg" width="760" height="640" alt="Close-up of Hannah's face looking at the viewer" loading="lazy"><figcaption>Expression, blink and gaze, layered over the motion</figcaption></figure>
+          <figure><picture><source type="image/webp" srcset="assets/gesture.webp"><img src="assets/gesture.jpg" width="420" height="580" alt="Hannah mid-sentence, one hand raised to her chest" loading="lazy"></picture><figcaption>A gesture generated from the sentence she is saying</figcaption></figure>
+          <figure><picture><source type="image/webp" srcset="assets/portrait.webp"><img src="assets/portrait.jpg" width="760" height="640" alt="Close-up of Hannah's face looking at the viewer" loading="lazy"></picture><figcaption>Expression, blink and gaze, layered over the motion</figcaption></figure>
         </div>
         <dl class="facts">
           <div><dt>Motion</dt><dd>Our own text&rarr;motion model: 55 body joints at 30&nbsp;fps, per sentence</dd></div>
@@ -230,7 +231,7 @@
         <h2>Lives on the desktop</h2>
         <p>A small window that stays on top of everything, on every workspace, and remembers where you left it. Say "go to the other screen" and she moves. Close it and the whole stack shuts down and frees your GPU.</p>
         <div class="desktop-row">
-          <figure class="widget-shot"><img src="assets/overlay.png" width="400" height="620" alt="The compact 400 by 620 Hannah window as it sits on a desktop" loading="lazy"><figcaption>The overlay, actual size</figcaption></figure>
+          <figure class="widget-shot"><picture><source type="image/webp" srcset="assets/overlay.webp"><img src="assets/overlay.png" width="400" height="620" alt="The compact 400 by 620 Hannah window as it sits on a desktop" loading="lazy"></picture><figcaption>The overlay, actual size</figcaption></figure>
           <div>
             <p class="sub">Works the same on</p>
             <ul class="grid-tiles">
@@ -302,7 +303,7 @@
         </ul>
         <p class="src">Teach her new skills with a markdown file: a description, one action, and the phrases that trigger it. Her look is a VRM model; her voice is any Kokoro or ElevenLabs voice.</p>
       </div>
-      <figure class="settings-shot"><img src="assets/settings.jpg" width="400" height="620" alt="The settings panel: three cards (brain on my PC or in the cloud, voice with a listen button, hands) with the technical options folded away" loading="lazy"></figure>
+      <figure class="settings-shot"><picture><source type="image/webp" srcset="assets/settings.webp"><img src="assets/settings.jpg" width="400" height="620" alt="The settings panel: three cards (brain on my PC or in the cloud, voice with a listen button, hands) with the technical options folded away" loading="lazy"></picture></figure>
     </div>
   </section>
 

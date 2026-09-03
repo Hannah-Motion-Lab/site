@@ -1,0 +1,21 @@
+# Vanth Labs
+
+> Vanth Labs builds AI that has a body and stays on your machine. Its product, Hannah, is an open source AI assistant with a voice, a 3D body and hands: she runs on your own computer, talks back in real time, gestures while she speaks, and acts on your machine with your permission. MIT-licensed. One command to install on Linux, macOS and Windows. Founded in 2026 in Lima, Peru.
+
+## Pages
+
+- [Hannah](https://vanthlabs.org/): what she does, requirements, install command, FAQ
+- [About Vanth Labs](https://vanthlabs.org/about/): what we believe, who we are, how to work with us
+- [Brand and press kit](https://vanthlabs.org/brand/): logos, colors, naming, official paragraph, screenshots
+
+## Code
+
+- [Workspace and setup guide](https://github.com/Vanth-Labs/workspace)
+- [Desktop app releases](https://github.com/Vanth-Labs/desktop/releases)
+- [Text-to-motion model](https://github.com/Vanth-Labs/motion-model)
+
+## Contact
+
+- hello@vanthlabs.org (general, press, partnerships)
+- sales@vanthlabs.org (Hannah as a brand character)
+- security@vanthlabs.org (vulnerabilities)

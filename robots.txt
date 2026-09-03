@@ -1,4 +1,34 @@
+# vanthlabs.org: everything is public. Search engines and AI answer engines are welcome to
+# read and cite these pages; the same is true of the installers.
 User-agent: *
+Allow: /
+
+# AI crawlers, named so that nothing is left to a default
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://vanthlabs.org/sitemap.xml
