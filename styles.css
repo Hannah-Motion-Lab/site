@@ -420,15 +420,17 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .kit-note a, .hero-solo .lede a { color: var(--text); text-decoration: underline; text-decoration-color: rgba(var(--neon-rgb), 0.5); text-underline-offset: 3px; }
 .logo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .logo-tile { margin: 0; border-radius: 12px; border: 1px solid var(--fog-2); padding: 40px 36px 16px; display: grid; gap: 22px; justify-items: center; }
-.logo-tile img { width: min(100%, 420px); height: auto; }
+.logo-tile img { width: min(100%, 420px); height: auto; aspect-ratio: 11828 / 1590; }
 .logo-tile.on-void { background: var(--void); }
 .logo-tile.on-white { background: #ffffff; color: #0a0912; }
 .logo-tile.on-neon { background: var(--neon); color: #0a0912; }
-.logo-tile figcaption { font-size: 13px; color: inherit; opacity: 0.75; justify-self: stretch; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.logo-tile figcaption { font-size: 13px; color: var(--text-3); justify-self: stretch; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-height: 20px; }
+.logo-tile.on-white figcaption { color: #4b4e5b; }
+.logo-tile.on-neon figcaption { color: #2b1a55; }
 .logo-tile .dl a { color: inherit; font-weight: 600; text-decoration: none; margin-left: 10px; }
 .logo-tile .dl a:hover { text-decoration: underline; }
 .logo-tile.marks { grid-template-columns: repeat(3, auto); justify-content: center; gap: 28px; align-items: center; }
-.logo-tile.marks img { width: 72px; height: 72px; }
+.logo-tile.marks img { width: 72px; height: 72px; aspect-ratio: 1; }
 .logo-tile.marks .on-white-chip { background: #fff; border-radius: 12px; padding: 8px; box-sizing: border-box; }
 .logo-tile.marks figcaption { grid-column: 1 / -1; }
 .kit-rules { margin-top: 26px; }
