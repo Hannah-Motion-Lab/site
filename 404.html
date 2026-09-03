@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0912">
+  <meta name="robots" content="noindex">
+  <title>Not here. Hannah</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b48cff'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='19' fill='%230a0912'%3EH%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .lost { min-height: 70vh; display: flex; align-items: center; }
+    .lost-inner { display: flex; flex-direction: column; gap: 18px; max-width: 560px; }
+    .lost .code { font-family: var(--mono); font-size: 13px; color: var(--neon); letter-spacing: 0.18em; }
+    .lost h1 { font-size: clamp(32px, 4vw, 46px); line-height: 1.08; margin: 0; }
+    .lost p { color: var(--text-3, #9d99b3); margin: 0; }
+    .lost .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+    .lost pre { background: var(--panel); border: 1px solid rgba(180, 140, 255, 0.16); border-radius: var(--r); padding: 12px 14px; overflow-x: auto; margin: 0; font-family: var(--mono); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">H</span>Hannah</a>
+    <nav class="nav-links" aria-label="Site">
+      <a href="/#capabilities">Capabilities</a>
+      <a href="/#fit">Requirements</a>
+      <a href="/#faq">FAQ</a>
+      <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap lost" aria-labelledby="lost-title">
+    <div class="lost-inner">
+      <span class="code">404</span>
+      <h1 id="lost-title">She looked, and there is nothing at this address.</h1>
+      <p>The page moved or never existed. If you came here for the installer, this is still the whole thing:</p>
+      <pre><code>curl -fsSL https://vanthlabs.org/install.sh | bash</code></pre>
+      <div class="actions">
+        <a class="btn btn-dark" href="/">Back to the start</a>
+        <a class="btn" href="https://github.com/Hannah-Motion-Lab/workspace/issues" target="_blank" rel="noopener">Report a broken link</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
