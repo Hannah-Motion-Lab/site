@@ -35,9 +35,18 @@
         "@id": "https://vanthlabs.org/#org",
         "name": "Vanth Labs",
         "url": "https://vanthlabs.org/",
-        "logo": "https://vanthlabs.org/assets/vanth-mark.svg",
+        "logo": "https://vanthlabs.org/assets/vanth-avatar-1024.png",
+        "image": "https://vanthlabs.org/assets/og-vanth.png",
         "email": "hello@vanthlabs.org",
         "sameAs": ["https://github.com/Vanth-Labs"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://vanthlabs.org/#website",
+        "url": "https://vanthlabs.org/",
+        "name": "Vanth Labs",
+        "publisher": { "@id": "https://vanthlabs.org/#org" },
+        "inLanguage": "en"
       },
       {
         "@type": "SoftwareApplication",
@@ -79,12 +88,13 @@
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">V</span>Vanth Labs</a>
+    <a class="brand" href="/"><img src="/assets/vanth-wordmark-header.svg" alt="Vanth Labs" width="179" height="24" decoding="async"></a>
     <nav class="nav-links" aria-label="Site">
       <a href="#hero-title">Hannah</a>
       <a href="#capabilities">Capabilities</a>
       <a href="#fit">Requirements</a>
       <a href="#faq">FAQ</a>
+      <a href="/about/">About</a>
       <a href="https://github.com/Vanth-Labs/workspace" target="_blank" rel="noopener">GitHub</a>
     </nav>
     <a class="btn btn-dark" href="#install">Install</a>
@@ -93,8 +103,11 @@
 
 <main>
 
-  <!-- HERO: the thesis in one line, and the product moving. The <video> shows its poster until
-       assets/demo.webm / demo.mp4 exist (recorded by the maker; script in the plan). -->
+  <!-- HERO: the thesis in one line, and the product moving. The <video> shows its poster until the
+       demo exists. When assets/demo.webm / demo.mp4 are recorded, add back inside the <video>:
+         <source src="assets/demo.webm" type="video/webm">
+         <source src="assets/demo.mp4" type="video/mp4">
+       (they are left out on purpose: a missing source is a 404 in every visitor's console). -->
   <section class="hero wrap" aria-labelledby="hero-title">
     <div class="hero-copy">
       <p class="sub">Hannah, by Vanth Labs</p>
@@ -109,8 +122,6 @@
     <figure class="hero-shot">
       <video id="demo" poster="assets/app.jpg" width="1600" height="1000" autoplay muted loop playsinline preload="metadata"
         aria-label="30-second demo of Hannah: she greets, sorts a downloads folder after asking permission, moves to the other screen, and the terminal panel shows what ran">
-        <source src="assets/demo.webm" type="video/webm">
-        <source src="assets/demo.mp4" type="video/mp4">
       </video>
     </figure>
   </section>
@@ -385,7 +396,7 @@ cat SETUP.md</code></pre>
 <footer class="footer">
   <div class="wrap footer-inner">
     <div>
-      <p class="footer-brand">Vanth Labs</p>
+      <p class="footer-brand"><a href="/"><img src="/assets/vanth-wordmark-header.svg" alt="Vanth Labs" width="209" height="28" loading="lazy" decoding="async"></a></p>
       <p class="footer-tag">We make Hannah, a local AI assistant with a voice, a body and hands. Open source, MIT.</p>
       <p class="footer-tag"><a href="mailto:hello@vanthlabs.org">hello@vanthlabs.org</a> &middot; <a href="mailto:security@vanthlabs.org">security@vanthlabs.org</a></p>
     </div>
@@ -395,6 +406,12 @@ cat SETUP.md</code></pre>
         <a href="https://github.com/Vanth-Labs/workspace" target="_blank" rel="noopener">Workspace</a>
         <a href="https://github.com/Vanth-Labs/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">Setup guide</a>
         <a href="https://github.com/Vanth-Labs/desktop/releases" target="_blank" rel="noopener">Releases</a>
+      </div>
+      <div>
+        <p class="footer-h">Company</p>
+        <a href="/about/">About Vanth Labs</a>
+        <a href="/brand/">Brand and press</a>
+        <a href="mailto:hello@vanthlabs.org">Contact</a>
       </div>
       <div>
         <p class="footer-h">Code</p>

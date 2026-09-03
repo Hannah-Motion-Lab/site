@@ -84,8 +84,8 @@ p { max-width: 64ch; }
 /* ── nav ─────────────────────────────────────────────────────────────────── */
 .nav { position: sticky; top: 0; z-index: 10; background: rgba(10, 9, 18, 0.88); backdrop-filter: blur(6px); border-bottom: 1px solid var(--fog-2); }
 .nav-inner { display: flex; align-items: center; gap: 32px; height: 60px; }
-.brand { display: inline-flex; align-items: center; gap: 9px; font-family: var(--serif); font-size: 19px; font-weight: 500; text-decoration: none; }
-.brand-mark { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--neon); color: var(--void); font-size: 15px; box-shadow: var(--neon-glow); }
+.brand { display: inline-flex; align-items: center; text-decoration: none; }
+.brand img { display: block; height: 24px; width: auto; }
 .nav-links { display: flex; gap: 22px; margin-right: auto; }
 .nav-links a { font-size: 14.5px; color: var(--text-2); text-decoration: none; }
 .nav-links a:hover { color: var(--text); }
@@ -261,7 +261,8 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 /* ── footer ──────────────────────────────────────────────────────────────── */
 .footer { background: var(--panel); color: var(--text); border-top: 1px solid var(--fog-2); padding: 56px 0 28px; }
 .footer-inner { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
-.footer-brand { font-family: var(--serif); font-size: 22px; }
+.footer-brand { margin-bottom: 10px; }
+.footer-brand img { display: block; height: 28px; width: auto; }
 .footer-tag { margin-top: 6px; font-size: 14px; color: var(--text-3); }
 .footer-tag a { color: var(--text-2); text-decoration: none; }
 .footer-tag a:hover { color: var(--neon-bright); }
