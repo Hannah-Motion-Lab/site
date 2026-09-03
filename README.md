@@ -29,7 +29,7 @@ GitHub Pages serves the root of `main` automatically, push and it's live.
 
 ## How install.sh works
 
-Queries the GitHub API for the latest release of [`Hannah-Motion-Lab/desktop`](https://github.com/Hannah-Motion-Lab/desktop),
+Queries the GitHub API for the latest release of [`Vanth-Labs/desktop`](https://github.com/Vanth-Labs/desktop),
 downloads the first `*.AppImage` asset into `~/.local/bin/Hannah.AppImage` and makes it
 executable. It refuses gracefully when no release exists yet.
 

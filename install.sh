@@ -24,7 +24,7 @@
 # models). The AppImage alone is only the window, it needs all of this behind it.
 set -euo pipefail
 
-ORG="Hannah-Motion-Lab"
+ORG="Vanth-Labs"
 RELEASE_REPO="${ORG}/desktop"
 ROOT="${HANNAH_HOME:-$HOME/Hannah-Motion}"
 BIN_DIR="$HOME/.local/bin"

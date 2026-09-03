@@ -17,7 +17,7 @@
 # Needs: git (Xcode Command Line Tools, the ONE thing that may ask an admin) and curl.
 set -u
 
-ORG="Hannah-Motion-Lab"
+ORG="Vanth-Labs"
 RELEASE_REPO="${ORG}/desktop"
 ROOT="${HANNAH_HOME:-$HOME/Hannah-Motion}"
 BIN_DIR="$HOME/.local/bin"

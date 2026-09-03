@@ -25,7 +25,7 @@ function Install-Hannah {
   $ProgressPreference = 'SilentlyContinue'
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-  $Org = 'Hannah-Motion-Lab'
+  $Org = 'Vanth-Labs'
   $Root = if ($env:HANNAH_HOME) { $env:HANNAH_HOME } else { Join-Path $env:USERPROFILE 'Hannah-Motion' }
   $Tools = Join-Path $Root '.tools'
   $Api = "https://api.github.com/repos/$Org/desktop/releases/latest"
