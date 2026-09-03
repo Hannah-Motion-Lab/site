@@ -21,6 +21,7 @@ dependencies**. Live at **https://vanthlabs.org/**.
 | `install.sh`, `install-mac.sh`, `install.ps1` | The installers, served from the root (their URLs are in every README: do not move them) |
 | `assets/vanth-*.svg`, `assets/vanth-*.png` | The wordmark (Fraunces outlines with the wing attached to the V) and the mark, in violet, white and black; PNGs for avatars; `og-vanth.png` for link previews |
 | `assets/*.webp` | Screenshots; each has its JPG next to it as the fallback in a `<picture>` |
+| `assets/fonts/` | Fraunces and Inter, latin subsets, self-hosted and preloaded (OFL) |
 | `favicon.svg` | The mark on a violet tile |
 | `robots.txt`, `sitemap.xml`, `llms.txt` | Crawlers: everything allowed (AI crawlers named explicitly), the three pages, a plain-text summary |
 | `CNAME`, `.nojekyll` | Custom domain; serve files as-is |
@@ -37,7 +38,8 @@ baseline. Regenerate only if the wing or the type changes; otherwise edit nothin
 Every page has its own title, description, canonical, OpenGraph and Twitter cards, and JSON-LD:
 `Organization`, `WebSite`, `SoftwareApplication` and `FAQPage` on the landing; `Organization`
 (with founders and contact points), `Person`, `AboutPage` and `BreadcrumbList` on About;
-`WebPage` and `BreadcrumbList` on Brand.
+`WebPage` and `BreadcrumbList` on Brand. Lighthouse 12 on the live site (2026-09-03), desktop and
+mobile, all three pages: 100 performance, 100 accessibility, 100 best practices, 100 SEO.
 
 ## Preview locally
 
