@@ -263,6 +263,8 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .footer-inner { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
 .footer-brand { font-family: var(--serif); font-size: 22px; }
 .footer-tag { margin-top: 6px; font-size: 14px; color: var(--text-3); }
+.footer-tag a { color: var(--text-2); text-decoration: none; }
+.footer-tag a:hover { color: var(--neon-bright); }
 .footer-cols { display: flex; gap: 56px; }
 .footer-cols div { display: flex; flex-direction: column; gap: 8px; }
 .footer-h { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }

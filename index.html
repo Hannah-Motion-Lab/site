@@ -5,13 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0912">
-  <title>Hannah, a local AI assistant with a voice, a body and hands</title>
-  <meta name="description" content="Hannah talks back in real time, moves while she speaks, and does things on your computer (sorting folders, running commands, finding files), asking before anything risky. Open source, runs on your own GPU or any API you pick. One command to install on Linux.">
-  <meta property="og:title" content="Hannah, an assistant with a voice, a body and hands">
-  <meta property="og:description" content="She talks back, moves while she speaks, and acts on your computer with your permission. Open source, local by default. One command to install.">
+  <title>Hannah, a local AI assistant with a body | Vanth Labs</title>
+  <meta name="description" content="Hannah is an open source AI assistant that runs on your own PC: she talks in real time, moves while she speaks, and acts on your computer with your permission. Linux, macOS and Windows.">
+  <meta name="author" content="Vanth Labs">
+  <meta name="keywords" content="local AI assistant, AI assistant with avatar, desktop AI companion, open source AI avatar, VRM AI, AI that runs locally, Vanth Labs, Hannah">
+  <link rel="canonical" href="https://vanthlabs.org/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Vanth Labs">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Hannah, a local AI assistant with a voice, a body and hands">
+  <meta property="og:description" content="She talks back, moves while she speaks, and acts on your computer with your permission. Open source, runs on your own machine. One command to install on Linux, macOS and Windows.">
   <meta property="og:image" content="https://vanthlabs.org/assets/app.jpg">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="1000">
+  <meta property="og:image:alt" content="Hannah, a 3D avatar, floating over a desktop and talking">
   <meta property="og:url" content="https://vanthlabs.org/">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b48cff'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='19' fill='%230a0912'%3EH%3C/text%3E%3C/svg%3E">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hannah, a local AI assistant with a voice, a body and hands">
+  <meta name="twitter:description" content="Open source. Runs on your own PC. Talks, moves while she speaks, and acts on your computer with your permission.">
+  <meta name="twitter:image" content="https://vanthlabs.org/assets/app.jpg">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://vanthlabs.org/#org",
+        "name": "Vanth Labs",
+        "url": "https://vanthlabs.org/",
+        "logo": "https://vanthlabs.org/assets/vanth-mark.svg",
+        "email": "hola@vanthlabs.org",
+        "sameAs": ["https://github.com/Hannah-Motion-Lab"]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://vanthlabs.org/#hannah",
+        "name": "Hannah",
+        "alternateName": "Hannah by Vanth Labs",
+        "description": "An open source AI assistant with a voice, a 3D body and hands. She runs on your own computer, talks in real time, gestures while she speaks, and can act on your machine with your permission.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Linux, macOS, Windows",
+        "softwareVersion": "1.0.16",
+        "license": "https://opensource.org/license/mit",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "downloadUrl": "https://vanthlabs.org/#install",
+        "screenshot": "https://vanthlabs.org/assets/app.jpg",
+        "url": "https://vanthlabs.org/",
+        "author": { "@id": "https://vanthlabs.org/#org" },
+        "publisher": { "@id": "https://vanthlabs.org/#org" }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Do I need an NVIDIA GPU?", "acceptedAnswer": { "@type": "Answer", "text": "Only for everything local at once. With a cloud brain, the voice on the CPU and vision off, a small NVIDIA card is enough. Without any, the gestures are computed on the CPU, slower." } },
+          { "@type": "Question", "name": "Does it send my data anywhere?", "acceptedAnswer": { "@type": "Answer", "text": "Not by default: the backend listens on localhost and every model runs on your machine. Only what you deliberately point at a provider leaves it: a cloud brain, a cloud voice, or the agent's model." } },
+          { "@type": "Question", "name": "What does it cost?", "acceptedAnswer": { "@type": "Answer", "text": "Nothing. Hannah is MIT-licensed. If you plug in a cloud provider, they bill you directly." } },
+          { "@type": "Question", "name": "Does it run on Windows or macOS?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, one command each, no admin. The gestures use Apple's GPU on a Mac, or an NVIDIA card on Windows, and fall back to the CPU otherwise." } },
+          { "@type": "Question", "name": "Can I change how she looks or sounds?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Her look is any VRM avatar file; her voice is any Kokoro voice or an ElevenLabs one. Language follows the voice." } }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,8 +79,9 @@
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#"><span class="brand-mark" aria-hidden="true">H</span>Hannah</a>
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">V</span>Vanth Labs</a>
     <nav class="nav-links" aria-label="Site">
+      <a href="#hero-title">Hannah</a>
       <a href="#capabilities">Capabilities</a>
       <a href="#fit">Requirements</a>
       <a href="#faq">FAQ</a>
@@ -38,7 +97,8 @@
        assets/demo.webm / demo.mp4 exist (recorded by the maker; script in the plan). -->
   <section class="hero wrap" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <h1 id="hero-title">An assistant with a voice, a body and hands.</h1>
+      <p class="sub">Hannah, by Vanth Labs</p>
+      <h1 id="hero-title">A local AI assistant with a voice, a body and hands.</h1>
       <p class="lede">Hannah talks back in real time, moves while she speaks, and does things on your computer (sorts your downloads, runs a command, finds a file), asking before anything risky. On your own GPU, or any API you pick.</p>
       <div class="hero-actions">
         <a class="btn btn-dark btn-lg cta-install" href="#install">Install</a>
@@ -48,7 +108,7 @@
     </div>
     <figure class="hero-shot">
       <video id="demo" poster="assets/app.jpg" width="1600" height="1000" autoplay muted loop playsinline preload="metadata"
-        aria-label="30-second demo: Hannah greets, sorts a downloads folder after asking permission, moves to the other screen, and the terminal panel shows what ran">
+        aria-label="30-second demo of Hannah: she greets, sorts a downloads folder after asking permission, moves to the other screen, and the terminal panel shows what ran">
         <source src="assets/demo.webm" type="video/webm">
         <source src="assets/demo.mp4" type="video/mp4">
       </video>
@@ -280,12 +340,12 @@ cat SETUP.md</code></pre>
 
   <!-- FROM THE MAKER: the credibility a young project can honestly offer -->
   <section class="wrap letter" aria-labelledby="letter-title">
-    <h2 id="letter-title">From the maker</h2>
+    <h2 id="letter-title">From Vanth Labs</h2>
     <div class="letter-body">
-      <p>Hannah started from a small frustration: talking to a text box never felt like talking to anyone. The models got good; the interaction stayed a chat. I wanted the thing science fiction promised: something on your screen that listens, answers in a voice, moves while it talks, and can actually do what you ask on your computer, with your permission.</p>
-      <p>Most of the stack is open work I assembled: Ollama, Whisper, Kokoro, VRM avatars. The part that was missing, I built: a text-to-motion model so that every sentence gets body language instead of a looping idle animation, and an agent under her voice that never speaks for itself.</p>
-      <p>It is one person's project, Linux-first, and honest about what it needs. If you try it, tell me what broke. If you like it, a star helps more than you'd think.</p>
-      <p class="letter-sign">Hannah Motion Lab</p>
+      <p>Hannah started from a small frustration: talking to a text box never felt like talking to anyone. The models got good; the interaction stayed a chat. We wanted the thing science fiction promised: something on your screen that listens, answers in a voice, moves while it talks, and can actually do what you ask on your computer, with your permission.</p>
+      <p>Most of the stack is open work we assembled: Ollama, Whisper, Kokoro, VRM avatars. The part that was missing, we built: a text-to-motion model so that every sentence gets body language instead of a looping idle animation, and an agent under her voice that never speaks for itself.</p>
+      <p>Vanth Labs is two people, and honest about what Hannah needs. If you try her, tell us what broke. If you like her, a star helps more than you'd think.</p>
+      <p class="letter-sign">Vanth Labs</p>
     </div>
     <div class="letter-links">
       <a class="btn btn-ghost" href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">Star on GitHub</a>
@@ -314,7 +374,7 @@ cat SETUP.md</code></pre>
   <section class="cta-band" aria-label="Install">
     <div class="wrap cta-inner">
       <h2>Ready when you are.</h2>
-      <p class="lede">One command on Linux. Ten minutes and a coffee while the models download.</p>
+      <p class="lede">One command on Linux, macOS or Windows. Ten minutes and a coffee while the models download.</p>
       <a class="btn btn-dark btn-lg cta-install" href="#install">Install</a>
       <p class="hero-fine">Free &middot; MIT &middot; nothing leaves your machine by default</p>
     </div>
@@ -325,12 +385,13 @@ cat SETUP.md</code></pre>
 <footer class="footer">
   <div class="wrap footer-inner">
     <div>
-      <p class="footer-brand">Hannah</p>
-      <p class="footer-tag">A local AI assistant with a voice, a body and hands. Open source, MIT.</p>
+      <p class="footer-brand">Vanth Labs</p>
+      <p class="footer-tag">We make Hannah, a local AI assistant with a voice, a body and hands. Open source, MIT.</p>
+      <p class="footer-tag"><a href="mailto:hola@vanthlabs.org">hola@vanthlabs.org</a> &middot; <a href="mailto:security@vanthlabs.org">security@vanthlabs.org</a></p>
     </div>
     <nav class="footer-cols" aria-label="Project links">
       <div>
-        <p class="footer-h">Project</p>
+        <p class="footer-h">Hannah</p>
         <a href="https://github.com/Hannah-Motion-Lab/workspace" target="_blank" rel="noopener">Workspace</a>
         <a href="https://github.com/Hannah-Motion-Lab/workspace/blob/main/SETUP.md" target="_blank" rel="noopener">Setup guide</a>
         <a href="https://github.com/Hannah-Motion-Lab/desktop/releases" target="_blank" rel="noopener">Releases</a>
@@ -345,7 +406,7 @@ cat SETUP.md</code></pre>
       </div>
     </nav>
   </div>
-  <div class="wrap footer-fine">&copy; 2026 Hannah Motion Lab</div>
+  <div class="wrap footer-fine">&copy; 2026 Vanth Labs &middot; <a href="https://vanthlabs.org/">vanthlabs.org</a></div>
 </footer>
 
 <script src="main.js"></script>

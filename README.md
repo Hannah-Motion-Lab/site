@@ -4,7 +4,7 @@ One-page site for Hannah, Ollama-style: hero with the copyable install command,
 feature grid, requirements and links to every repo in the org. Plain HTML/CSS/JS , 
 **no build step, no dependencies, no webfonts**.
 
-Live at **https://vanthlabs.org/**
+Live at **https://vanthlabs.org/**, the site of Vanth Labs, the company behind Hannah.
 
 ## Files
 
