@@ -1,20 +1,43 @@
-# hannah-site: landing page
+# site: vanthlabs.org
 
-One-page site for Hannah, Ollama-style: hero with the copyable install command,
-feature grid, requirements and links to every repo in the org. Plain HTML/CSS/JS , 
-**no build step, no dependencies, no webfonts**.
+The site of Vanth Labs, the company behind Hannah. Plain HTML/CSS/JS, **no build step, no
+dependencies**. Live at **https://vanthlabs.org/**.
 
-Live at **https://vanthlabs.org/**, the site of Vanth Labs, the company behind Hannah.
+## Pages
+
+| Path | What it is |
+|---|---|
+| `/` (`index.html`) | Hannah: the product landing, with the copyable install command, capabilities, requirements, FAQ |
+| `/about/` | Vanth Labs: what we believe, who we are, work with us, contact |
+| `/brand/` | Brand and press kit: logos, colors, type, naming, official paragraph, screenshots |
+| `404.html` | Custom not-found page (GitHub Pages picks it up by name) |
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `index.html` | The whole page (single section flow: hero → features → requirements → source) |
-| `styles.css` | Dark theme, violet→pink accent, system font stacks |
-| `main.js` | Just the Copy button (clipboard API + legacy fallback) |
-| `install.sh` | Ollama-style installer served from this same page |
-| `.nojekyll` | Tells GitHub Pages to serve files as-is |
+| `styles.css` | One stylesheet for every page: dark theme, violet accent, Fraunces + Inter |
+| `main.js` | Landing only: OS switcher, copy button, hero video behavior |
+| `install.sh`, `install-mac.sh`, `install.ps1` | The installers, served from the root (their URLs are in every README: do not move them) |
+| `assets/vanth-*.svg`, `assets/vanth-*.png` | The wordmark (Fraunces outlines with the wing attached to the V) and the mark, in violet, white and black; PNGs for avatars; `og-vanth.png` for link previews |
+| `assets/*.webp` | Screenshots; each has its JPG next to it as the fallback in a `<picture>` |
+| `favicon.svg` | The mark on a violet tile |
+| `robots.txt`, `sitemap.xml`, `llms.txt` | Crawlers: everything allowed (AI crawlers named explicitly), the three pages, a plain-text summary |
+| `CNAME`, `.nojekyll` | Custom domain; serve files as-is |
+
+## Logo
+
+The wordmark is generated, not drawn by hand: "Vanth Labs" set in Fraunces (wght 500, opsz 48)
+converted to outlines with fontTools, plus the wing (the mark, unchanged) scaled to the cap height
+and attached at the left of the V, its top feather flush with the cap line and the light on the
+baseline. Regenerate only if the wing or the type changes; otherwise edit nothing by hand.
+
+## SEO
+
+Every page has its own title, description, canonical, OpenGraph and Twitter cards, and JSON-LD:
+`Organization`, `WebSite`, `SoftwareApplication` and `FAQPage` on the landing; `Organization`
+(with founders and contact points), `Person`, `AboutPage` and `BreadcrumbList` on About;
+`WebPage` and `BreadcrumbList` on Brand.
 
 ## Preview locally
 
