@@ -1,4 +1,5 @@
 /* Fonts, self-hosted (OFL, the latin subsets Google Fonts serves): one origin, preloaded, no third-party CSS. */
+@font-face { font-family: "Orbitron"; font-style: normal; font-weight: 400 900; font-display: swap; src: url("/assets/fonts/orbitron-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Fraunces"; font-style: normal; font-weight: 500; font-display: swap; src: url("/assets/fonts/fraunces-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Inter"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("/assets/fonts/inter-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
@@ -37,7 +38,7 @@
   /* layered: a tight core, a soft spill, a wide wash, reads as a light source, not a blur */
   --neon-glow: 0 0 6px rgba(var(--neon-rgb), 0.55), 0 0 22px rgba(var(--neon-rgb), 0.32), 0 0 56px rgba(var(--neon-rgb), 0.14);
   --neon-glow-hover: 0 0 8px rgba(var(--neon-rgb), 0.7), 0 0 30px rgba(var(--neon-rgb), 0.45), 0 0 80px rgba(var(--neon-rgb), 0.2);
-  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --serif: "Orbitron", "Fraunces", Georgia, sans-serif;   /* the display face: the geometric letters of the logo */
   --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --wrap: 1120px;
@@ -64,7 +65,7 @@ pre code { background: none; padding: 0; font-size: 13.5px; }
 
 .wrap { max-width: var(--wrap); margin: 0 auto; padding-left: 24px; padding-right: 24px; }
 
-h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.012em; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; }
 h2 { font-size: clamp(28px, 3vw, 36px); line-height: 1.15; margin-bottom: 14px; }
 h3 { font-size: 20px; line-height: 1.25; margin-bottom: 12px; }
 p { max-width: 64ch; }
@@ -89,7 +90,7 @@ p { max-width: 64ch; }
 .nav { position: sticky; top: 0; z-index: 10; background: rgba(10, 9, 18, 0.88); backdrop-filter: blur(6px); border-bottom: 1px solid var(--fog-2); }
 .nav-inner { display: flex; align-items: center; gap: 32px; height: 60px; }
 .brand { display: inline-flex; align-items: center; text-decoration: none; }
-.brand img { display: block; height: 24px; width: auto; }
+.brand img { display: block; height: 30px; width: auto; }
 .nav-links { display: flex; gap: 22px; margin-right: auto; }
 .nav-links a { font-size: 14.5px; color: var(--text-2); text-decoration: none; }
 .nav-links a:hover { color: var(--text); }
@@ -116,7 +117,7 @@ p { max-width: 64ch; }
   gap: 48px; align-items: center;
   padding-top: 72px; padding-bottom: 56px;
 }
-.hero h1 { font-size: clamp(36px, 4.4vw, 54px); line-height: 1.05; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(28px, 3.4vw, 42px); line-height: 1.12; margin-bottom: 18px; }
 .lede { font-size: clamp(16px, 1.25vw, 18px); color: var(--text-2); max-width: 46ch; }
 .hero-actions { display: flex; align-items: center; gap: 22px; margin-top: 26px; }
 .hero-fine { margin-top: 18px; font-size: 13px; color: var(--text-3); }
@@ -266,7 +267,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .footer { background: var(--panel); color: var(--text); border-top: 1px solid var(--fog-2); padding: 56px 0 28px; }
 .footer-inner { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
 .footer-brand { margin-bottom: 10px; }
-.footer-brand img { display: block; height: 28px; width: auto; }
+.footer-brand img { display: block; height: 34px; width: auto; }
 .footer-tag { margin-top: 6px; font-size: 14px; color: var(--text-3); }
 .footer-tag a { color: var(--text-2); text-decoration: none; }
 .footer-tag a:hover { color: var(--neon-bright); }
@@ -306,7 +307,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 
 /* pillars band */
 .pillars-band { border-top: 1px solid var(--fog-2); border-bottom: 1px solid var(--fog-2); padding: 56px 0; }
-.pillars-title { font-size: clamp(24px, 2.4vw, 30px); margin-bottom: 28px; }
+.pillars-title { font-size: clamp(20px, 2vw, 26px); margin-bottom: 28px; }
 .pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
 .pillar h3 { color: var(--neon); font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
 .pillar p { color: var(--text-2); font-size: 15.5px; }
@@ -368,7 +369,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 /* closing band */
 .cta-band { padding: 88px 0; border-top: 1px solid var(--fog-2); }
 .cta-inner { max-width: 820px; margin: 0 auto; text-align: center; }
-.cta-inner h2 { font-size: clamp(32px, 3.6vw, 44px); margin-bottom: 22px; }
+.cta-inner h2 { font-size: clamp(26px, 3vw, 36px); margin-bottom: 22px; }
 .cta-inner .lede { margin: 0 auto 22px; }
 .cta-inner .hero-fine { margin-top: 16px; }
 
@@ -403,7 +404,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 /* ── company pages (/about/, /brand/) ────────────────────────────────────── */
 .hero-solo { grid-template-columns: minmax(0, 1fr); padding-bottom: 64px; }
 .hero-solo .hero-copy { max-width: 760px; }
-.hero-solo h1 { font-size: clamp(34px, 4vw, 50px); }
+.hero-solo h1 { font-size: clamp(26px, 3.1vw, 38px); }
 .crumbs { display: flex; gap: 8px; font-size: 13px; color: var(--text-3); margin-bottom: 18px; }
 .crumbs a { color: var(--text-3); text-decoration: none; }
 .crumbs a:hover { color: var(--text); }
@@ -424,7 +425,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .kit-note a, .hero-solo .lede a { color: var(--text); text-decoration: underline; text-decoration-color: rgba(var(--neon-rgb), 0.5); text-underline-offset: 3px; }
 .logo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .logo-tile { margin: 0; border-radius: 12px; border: 1px solid var(--fog-2); padding: 40px 36px 16px; display: grid; gap: 22px; justify-items: center; }
-.logo-tile img { width: min(100%, 420px); height: auto; aspect-ratio: 11828 / 1590; }
+.logo-tile img { width: min(100%, 420px); height: auto; aspect-ratio: 1738 / 410; }
 .logo-tile.on-void { background: var(--void); }
 .logo-tile.on-white { background: #ffffff; color: #0a0912; }
 .logo-tile.on-neon { background: var(--neon); color: #0a0912; }
@@ -448,7 +449,7 @@ figcaption { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .type-card { border: 1px solid var(--fog-2); border-radius: 12px; padding: 24px; }
 .type-card p { color: var(--text-2); font-size: 14.5px; }
 .type-card .type-sample { font-size: 44px; color: var(--text); margin-bottom: 10px; line-height: 1.1; }
-.type-sample.serif { font-family: var(--serif); font-weight: 500; }
+.type-sample.serif { font-family: var(--serif); font-weight: 600; }
 .type-sample.sans { font-family: var(--sans); font-weight: 600; letter-spacing: -0.02em; }
 .naming div { grid-template-columns: 130px 1fr; }
 .naming dt { color: var(--text); font-weight: 600; }

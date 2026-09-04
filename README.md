@@ -16,22 +16,22 @@ dependencies**. Live at **https://vanthlabs.org/**.
 
 | File | What it is |
 |---|---|
-| `styles.css` | One stylesheet for every page: dark theme, violet accent, Fraunces + Inter |
+| `styles.css` | One stylesheet for every page: dark theme, violet accent, Orbitron + Inter |
 | `main.js` | Landing only: OS switcher, copy button, hero video behavior |
 | `install.sh`, `install-mac.sh`, `install.ps1` | The installers, served from the root (their URLs are in every README: do not move them) |
-| `assets/vanth-*.svg`, `assets/vanth-*.png` | The wordmark (Fraunces outlines with the wing attached to the V) and the mark, in violet, white and black; PNGs for avatars; `og-vanth.png` for link previews |
+| `assets/vanth-*.svg`, `assets/vanth-*.png` | The logo: `vanth-logo.svg` is the source lockup (mark + letters); `vanth-icon.png` the mark recolored to the site violet; lockups and marks in three colors; PNGs for avatars; `og-vanth.png` for link previews |
 | `assets/*.webp` | Screenshots; each has its JPG next to it as the fallback in a `<picture>` |
-| `assets/fonts/` | Fraunces and Inter, latin subsets, self-hosted and preloaded (OFL) |
+| `assets/fonts/` | Orbitron (headings), Inter (text) and Fraunces (fallback), latin subsets, self-hosted (OFL) |
 | `favicon.svg` | The mark on a violet tile |
 | `robots.txt`, `sitemap.xml`, `llms.txt` | Crawlers: everything allowed (AI crawlers named explicitly), the three pages, a plain-text summary |
 | `CNAME`, `.nojekyll` | Custom domain; serve files as-is |
 
 ## Logo
 
-The wordmark is generated, not drawn by hand: "Vanth Labs" set in Fraunces (wght 500, opsz 48)
-converted to outlines with fontTools, plus the wing (the mark, unchanged) scaled to the cap height
-and attached at the left of the V, its top feather flush with the cap line and the light on the
-baseline. Regenerate only if the wing or the type changes; otherwise edit nothing by hand.
+`assets/vanth-logo.svg` is the source (a raster mark plus the letter outlines). Every other
+`vanth-*` file derives from it: the mark is the same PNG with its RGB replaced by the site violet
+(`#b48cff`), alpha untouched; the lockups place that mark at 438x410 and the letters in white,
+black or the site text color. Headings use Orbitron because that is the family of the letters.
 
 ## SEO
 
