@@ -17,13 +17,11 @@ dependencies**. Live at **https://vanthlabs.org/**.
 | File | What it is |
 |---|---|
 | `styles.css` | One stylesheet for every page: dark theme, violet accent, Orbitron + Inter, the HUD vocabulary (eyebrows, corner-bracket frames, progress hairline) and the scroll motion |
-| `main.js` | Landing only: OS switcher, copy button, clips that play only on screen, reveals, the progress hairline, the sticky job (step picks the capture), the scroll-driven frame sequence |
+| `main.js` | Landing only: OS switcher, copy button, clips that play only on screen, reveals, the progress hairline, the sticky job (step picks the capture) |
 | `install.sh`, `install-mac.sh`, `install.ps1` | The installers, served from the root (their URLs are in every README: do not move them) |
 | `assets/vanth-*.svg`, `assets/vanth-*.png` | The logo: `vanth-logo.svg` is the source lockup (mark + letters); `vanth-icon.png` the mark recolored to the site violet; lockups and marks in three colors; PNGs for avatars; `og-vanth.png` for link previews |
 | `assets/*.webp` | Screenshots; each has its JPG next to it as the fallback in a `<picture>` |
-| `assets/media/` | The captures on the landing: every clip as `.webm` (VP9) + `.mp4` (H.264) + `.webp` poster, muted, 30 fps. `hero` is the avatar render; `say-*`, `hands-*`, `avatar-swap`, `overlay-live`, `hud-permission` are cut from two screen recordings; `film-*` are the generated concept films (labeled as such on the page) |
-| `assets/seq/` | 48 WebP frames (`f00`..`f47`) of the motion-skeleton visualization, drawn to a canvas as you scroll through the Presence band. Generated with Higgsfield (Seedance 2.5) and extracted at 6 fps |
-| `assets/fonts/` | Orbitron (headings), Inter (text) and Fraunces (fallback), latin subsets, self-hosted (OFL) |
+| `assets/media/` | The captures on the landing: every clip as `.webm` (VP9) + `.mp4` (H.264) + `.webp` poster, muted, 30 fps. All of them (`hero`, `say-*`, `hands-*`, `avatar-swap`, and the stills `overlay-live`, `hud-permission`, `gesture-wide`) are cut from two screen recordings; nothing is generated |
 | `favicon.svg` | The mark on a violet tile |
 | `robots.txt`, `sitemap.xml`, `llms.txt` | Crawlers: everything allowed (AI crawlers named explicitly), the three pages, a plain-text summary |
 | `CNAME`, `.nojekyll` | Custom domain; serve files as-is |
@@ -53,7 +51,7 @@ ffmpeg -ss START -to END -i take.mp4 -an -vf "CROP,fps=30,format=yuv420p" -c:v l
 ffmpeg -ss START -i take.mp4 -frames:v 1 -vf "CROP" -c:v libwebp -quality 80 out.webp   # poster
 ```
 
-Every `<video>` on the page is `muted playsinline preload="none"` with a poster, and `main.js` plays it only while it is on screen (with `prefers-reduced-motion` nothing autoplays; the clips get controls instead). The frame sequence: `ffmpeg -i motion.mp4 -vf "fps=6,scale=1280:720" -c:v libwebp -quality 72 assets/seq/f%02d.webp`.
+Every `<video>` on the page is `muted playsinline preload="none"` with a poster, and `main.js` plays it only while it is on screen (with `prefers-reduced-motion` nothing autoplays; the clips get controls instead).
 
 ## Preview locally
 

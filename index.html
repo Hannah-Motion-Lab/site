@@ -105,32 +105,31 @@
 
 <main>
 
-  <!-- HERO: the thesis in one line, and Hannah herself, full bleed, dissolving into the page.
-       The clip is a real render of the avatar (assets/media/hero.*), muted, on a near-black
-       ground, so a radial mask makes it part of the void instead of a rectangle on it. -->
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="hero-film" aria-hidden="true">
-      <video id="demo" class="hero-video" poster="assets/media/hero.webp" width="1280" height="720" autoplay muted loop playsinline preload="metadata" data-auto>
+  <!-- HERO: the thesis in one line, and the product in use: her window moving around a real
+       desktop, cut from a recording session (assets/media/hero.*). -->
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="eyebrow"><i></i>Hannah, by Vanth Labs</p>
+      <h1 id="hero-title">A local AI assistant with a voice, a body and hands.</h1>
+      <p class="lede">Hannah talks back in real time, moves while she speaks, and does things on your computer (sorts your downloads, runs a command, finds a file), asking before anything risky. On your own GPU, or any API you pick.</p>
+      <div class="hero-actions">
+        <a class="btn btn-dark btn-lg cta-install" href="#install">Install</a>
+        <a class="link-arrow" href="#hands">See her work</a>
+      </div>
+      <ul class="hud" aria-label="At a glance">
+        <li><b>0.72 s</b> to the first word</li>
+        <li><b>127.0.0.1</b> is where she listens</li>
+        <li><b>MIT</b> free, open source</li>
+      </ul>
+    </div>
+    <figure class="hero-shot frame">
+      <div class="shot"><video id="demo" poster="assets/media/hero.webp" width="1400" height="654" autoplay muted loop playsinline preload="metadata" data-auto
+        aria-label="Hannah's window on a desktop, moving from the top right corner to the bottom right as asked, while she talks">
         <source src="assets/media/hero.webm" type="video/webm">
         <source src="assets/media/hero.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="wrap hero-inner">
-      <div class="hero-copy">
-        <p class="eyebrow"><i></i>Hannah, by Vanth Labs</p>
-        <h1 id="hero-title">A local AI assistant with a voice, a body and hands.</h1>
-        <p class="lede">Hannah talks back in real time, moves while she speaks, and does things on your computer (sorts your downloads, runs a command, finds a file), asking before anything risky. On your own GPU, or any API you pick.</p>
-        <div class="hero-actions">
-          <a class="btn btn-dark btn-lg cta-install" href="#install">Install</a>
-          <a class="link-arrow" href="#hands">See her work</a>
-        </div>
-        <ul class="hud" aria-label="At a glance">
-          <li><b>0.72 s</b> to the first word</li>
-          <li><b>127.0.0.1</b> is where she listens</li>
-          <li><b>MIT</b> free, open source</li>
-        </ul>
-      </div>
-    </div>
+      </video></div>
+      <figcaption>Her window on a desktop, from a recording session. "Top right corner, here I am."</figcaption>
+    </figure>
   </section>
 
   <!-- PILLARS: why she exists, in three lines with a measured number each -->
@@ -157,39 +156,18 @@
     </div>
   </section>
 
-  <!-- MOTION: the thing we built. A scroll-driven frame sequence of a motion skeleton (assets/seq/),
-       generated for this page; the captions and numbers are the measured ones. -->
-  <section id="motion" class="motion" aria-labelledby="motion-title" data-scrub data-frames="48" data-src="assets/seq/f{i}.webp">
-    <div class="motion-sticky">
-      <div class="motion-stage">
-        <img class="motion-poster" src="assets/seq/f00.webp" width="1280" height="720" alt="" loading="lazy" decoding="async">
-        <canvas class="motion-canvas" width="1280" height="720" aria-hidden="true"></canvas>
-      </div>
-      <div class="wrap motion-copy">
-        <p class="eyebrow"><i></i>Presence &middot; text to motion</p>
-        <h2 id="motion-title">Every sentence becomes body language.</h2>
-        <ol class="motion-steps" aria-label="How a sentence becomes motion">
-          <li data-at="0">A sentence comes in from the brain, one at a time, while the rest is still being written.</li>
-          <li data-at="0.33">Our own text-to-motion model writes <b>55 joints at 30&nbsp;fps</b> for it, not a clip picked from a library.</li>
-          <li data-at="0.66">It lands on her skeleton through a retarget computed from both rigs' rest pose. <b>4.7&nbsp;s</b> from your last word to her first sentence, spoken and moving.</li>
-        </ol>
-        <p class="src">The skeleton is a visualization made for this page. The numbers are measured on the local stack, RTX 5070 Ti.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- WHAT YOU CAN SAY: four real exchanges, each with the capture it came from -->
   <section class="wrap says" aria-labelledby="says-title">
     <p class="eyebrow reveal"><i></i>What you can say</p>
     <h2 id="says-title" class="reveal">In your words, not hers.</h2>
-    <p class="lede reveal">Four things she does today, cut from two recording sessions. Nothing staged, no compositing: her window, on a real desktop.</p>
+    <p class="lede reveal">Four things she does today, cut from two recording sessions. Nothing staged, nothing generated: her window, on a real desktop.</p>
     <div class="says-grid">
       <article class="say reveal">
         <figure class="frame">
-          <video muted loop playsinline preload="none" poster="assets/media/say-move.webp" width="1280" height="720" data-auto aria-label="Hannah's window going from full screen to small and centered, to the top right corner, to the bottom right, as asked">
+          <div class="shot"><video muted loop playsinline preload="none" poster="assets/media/say-move.webp" width="1280" height="720" data-auto aria-label="Hannah going from full screen to a small centered window, then to the top right corner, as asked">
             <source src="assets/media/say-move.webm" type="video/webm"><source src="assets/media/say-move.mp4" type="video/mp4">
-          </video>
-          <figcaption>2&times; speed</figcaption>
+          </video></div>
+          <figcaption>1.5&times; speed</figcaption>
         </figure>
         <div class="transcript">
           <p><span class="who">you</span>small and centered</p>
@@ -201,9 +179,9 @@
       </article>
       <article class="say reveal">
         <figure class="frame">
-          <video muted loop playsinline preload="none" poster="assets/media/say-github.webp" width="1280" height="720" data-auto aria-label="A browser opening on GitHub's homepage while Hannah's window stays in the corner">
+          <div class="shot"><video muted loop playsinline preload="none" poster="assets/media/say-github.webp" width="1280" height="720" data-auto aria-label="A browser opening on GitHub's homepage while Hannah's window stays in the corner">
             <source src="assets/media/say-github.webm" type="video/webm"><source src="assets/media/say-github.mp4" type="video/mp4">
-          </video>
+          </video></div>
         </figure>
         <div class="transcript">
           <p><span class="who">you</span>open GitHub</p>
@@ -213,9 +191,9 @@
       </article>
       <article class="say reveal">
         <figure class="frame">
-          <video muted loop playsinline preload="none" poster="assets/media/say-joke.webp" width="960" height="540" data-auto aria-label="Hannah in full screen, telling a joke and gesturing while she talks">
+          <div class="shot"><video muted loop playsinline preload="none" poster="assets/media/say-joke.webp" width="960" height="540" data-auto aria-label="Hannah in full screen, telling a joke and gesturing while she talks">
             <source src="assets/media/say-joke.webm" type="video/webm"><source src="assets/media/say-joke.mp4" type="video/mp4">
-          </video>
+          </video></div>
         </figure>
         <div class="transcript">
           <p><span class="who">you</span>tell me a joke</p>
@@ -225,9 +203,9 @@
       </article>
       <article class="say reveal">
         <figure class="frame">
-          <video muted loop playsinline preload="none" poster="assets/media/say-disk.webp" width="960" height="540" data-auto aria-label="Hannah answering how much disk space is left">
+          <div class="shot"><video muted loop playsinline preload="none" poster="assets/media/say-disk.webp" width="960" height="540" data-auto aria-label="Hannah answering how much disk space is left">
             <source src="assets/media/say-disk.webm" type="video/webm"><source src="assets/media/say-disk.mp4" type="video/mp4">
-          </video>
+          </video></div>
         </figure>
         <div class="transcript">
           <p><span class="who">you</span>how much disk do I have left?</p>
@@ -308,13 +286,13 @@
         <h2>A real terminal, and a conscience.</h2>
         <p>Turn on tools and she opens apps, runs commands in a real terminal and searches the web. Give her a job with several steps, like "organize my downloads by type", and a separate agent does it, with risk-tiered approvals, an audit log and undo. Anything destructive asks you first; anything high-risk needs the button, not just your voice.</p>
         <figure class="wide-shot frame">
-          <video muted loop playsinline preload="none" poster="assets/media/hands-terminal.webp" width="1280" height="626" data-auto aria-label="Hannah in full screen with the terminal panel open under her, showing the commands the agent ran">
+          <div class="shot"><video muted loop playsinline preload="none" poster="assets/media/hands-terminal.webp" width="1280" height="626" data-auto aria-label="Hannah in full screen with the terminal panel open under her, showing the commands the agent ran">
             <source src="assets/media/hands-terminal.webm" type="video/webm"><source src="assets/media/hands-terminal.mp4" type="video/mp4">
-          </video>
+          </video></div>
           <figcaption>The terminal panel: a real shell, and every command the agent runs echoed there too</figcaption>
         </figure>
         <div class="hud-row">
-          <figure class="hud-shot frame"><picture><source type="image/webp" srcset="assets/media/hud-permission.webp"><img src="assets/media/hud-permission.jpg" width="400" height="620" alt="Hannah's window with the permission dialog: the command she wants to run, and Reject or Run buttons" loading="lazy"></picture><figcaption>The HUD, actual size: what it wants to run, and two buttons</figcaption></figure>
+          <figure class="hud-shot frame"><div class="shot"><picture><source type="image/webp" srcset="assets/media/hud-permission.webp"><img src="assets/media/hud-permission.jpg" width="400" height="620" alt="Hannah's window with the permission dialog: the command she wants to run, and Reject or Run buttons" loading="lazy"></picture></div><figcaption>The HUD, actual size: what it wants to run, and two buttons</figcaption></figure>
           <dl class="facts">
             <div><dt>One command</dt><dd>Something whose exact shape she already knows: list a folder, open an app. Instant, handled by the backend.</dd></div>
             <div><dt>A skill</dt><dd>A named shortcut you can add with a markdown file: a description, one action, the phrases that trigger it. She picks the skill; the backend runs the command.</dd></div>
@@ -334,8 +312,8 @@
         </div>
         <p class="src">Measured on a text turn, local stack, RTX 5070 Ti. The first sentence waits for its own audio to synthesize; the rest stream behind it.</p>
         <div class="shots-2">
-          <figure class="frame"><picture><source type="image/webp" srcset="assets/gesture.webp"><img src="assets/gesture.jpg" width="420" height="580" alt="Hannah mid-sentence, one hand raised to her chest" loading="lazy"></picture><figcaption>A gesture generated from the sentence she is saying</figcaption></figure>
-          <figure class="frame"><img src="assets/media/gesture-wide.webp" width="960" height="540" alt="Hannah in full screen with both arms open mid-sentence" loading="lazy"><figcaption>Mid-sentence in full screen, from a recording session</figcaption></figure>
+          <figure class="frame"><div class="shot"><picture><source type="image/webp" srcset="assets/gesture.webp"><img src="assets/gesture.jpg" width="420" height="580" alt="Hannah mid-sentence, one hand raised to her chest" loading="lazy"></picture></div><figcaption>A gesture generated from the sentence she is saying</figcaption></figure>
+          <figure class="frame"><div class="shot"><img src="assets/media/gesture-wide.webp" width="960" height="540" alt="Hannah in full screen with both arms open mid-sentence" loading="lazy"></div><figcaption>Mid-sentence in full screen, from a recording session</figcaption></figure>
         </div>
         <dl class="facts">
           <div><dt>Motion</dt><dd>Our own text&rarr;motion model: 55 body joints at 30&nbsp;fps, per sentence</dd></div>
@@ -350,12 +328,12 @@
         <h2>A small window that stays on top.</h2>
         <p>On every workspace, above everything, and it remembers where you left it. Say "go to the other screen" and she moves. Close it and the whole stack shuts down and frees your GPU. Her look is any VRM avatar file: drop one in and she is someone else.</p>
         <div class="desktop-row">
-          <figure class="widget-shot frame"><picture><source type="image/webp" srcset="assets/media/overlay-live.webp"><img src="assets/media/overlay-live.jpg" width="400" height="620" alt="The compact 400 by 620 Hannah window as it sits on a desktop, status line reading neutral, speaking" loading="lazy"></picture><figcaption>The overlay, actual size, from a recording</figcaption></figure>
+          <figure class="widget-shot frame"><div class="shot"><picture><source type="image/webp" srcset="assets/media/overlay-live.webp"><img src="assets/media/overlay-live.jpg" width="400" height="620" alt="The compact 400 by 620 Hannah window as it sits on a desktop, status line reading neutral, speaking" loading="lazy"></picture></div><figcaption>The overlay, actual size, from a recording</figcaption></figure>
           <div>
             <figure class="frame swap-shot">
-              <video muted loop playsinline preload="none" poster="assets/media/avatar-swap.webp" width="960" height="540" data-auto aria-label="A different avatar, dark hair and a white dress, waving from the same window">
+              <div class="shot"><video muted loop playsinline preload="none" poster="assets/media/avatar-swap.webp" width="960" height="540" data-auto aria-label="A different avatar, dark hair and a white dress, waving from the same window">
                 <source src="assets/media/avatar-swap.webm" type="video/webm"><source src="assets/media/avatar-swap.mp4" type="video/mp4">
-              </video>
+              </video></div>
               <figcaption>Another VRM file, same voice, same hands</figcaption>
             </figure>
             <p class="sub">Works the same on</p>
@@ -496,33 +474,6 @@ cat SETUP.md</code></pre>
     </div>
   </section>
 
-  <!-- FILMS: where we imagine her next. Generated concept footage, labeled as such. -->
-  <section class="wrap films" aria-labelledby="films-title">
-    <p class="eyebrow reveal"><i></i>Concept films</p>
-    <h2 id="films-title" class="reveal">Where she could live next.</h2>
-    <p class="lede reveal">A counter, a lecture hall, a pharmacy: a screen with someone on it who listens and acts. These three are generated concept films, not captures; everything above them is.</p>
-    <div class="film-row">
-      <figure class="film frame reveal">
-        <video muted loop playsinline preload="none" poster="assets/media/film-bakery.webp" width="540" height="960" data-auto aria-label="Concept film: a baker at her counter talking to a screen">
-          <source src="assets/media/film-bakery.webm" type="video/webm"><source src="assets/media/film-bakery.mp4" type="video/mp4">
-        </video>
-        <figcaption>A bakery counter</figcaption>
-      </figure>
-      <figure class="film frame reveal">
-        <video muted loop playsinline preload="none" poster="assets/media/film-auditorium.webp" width="960" height="540" data-auto aria-label="Concept film: Hannah on the screen of a dark lecture hall">
-          <source src="assets/media/film-auditorium.webm" type="video/webm"><source src="assets/media/film-auditorium.mp4" type="video/mp4">
-        </video>
-        <figcaption>A lecture hall</figcaption>
-      </figure>
-      <figure class="film frame reveal">
-        <video muted loop playsinline preload="none" poster="assets/media/film-pharmacy.webp" width="540" height="960" data-auto aria-label="Concept film: an avatar on a tall screen at a pharmacy counter">
-          <source src="assets/media/film-pharmacy.webm" type="video/webm"><source src="assets/media/film-pharmacy.mp4" type="video/mp4">
-        </video>
-        <figcaption>A pharmacy</figcaption>
-      </figure>
-    </div>
-  </section>
-
   <!-- FAQ -->
   <section id="faq" class="faq">
     <div class="wrap faq-inner">
@@ -540,13 +491,8 @@ cat SETUP.md</code></pre>
     </div>
   </section>
 
-  <!-- CLOSE: one line and a button back to the command; a concept film of a desk at night behind it -->
-  <section class="cta-band has-film" aria-label="Install">
-    <div class="cta-film" aria-hidden="true">
-      <video muted loop playsinline preload="none" poster="assets/media/film-desk.webp" width="1280" height="720" data-auto>
-        <source src="assets/media/film-desk.webm" type="video/webm"><source src="assets/media/film-desk.mp4" type="video/mp4">
-      </video>
-    </div>
+  <!-- CLOSE: one line and a button back to the command; the command itself lives in #install only -->
+  <section class="cta-band" aria-label="Install">
     <div class="wrap cta-inner">
       <h2 class="reveal">Ready when you are.</h2>
       <p class="lede reveal">One command on Linux, macOS or Windows. Ten minutes and a coffee while the models download.</p>

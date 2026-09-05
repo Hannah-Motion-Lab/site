@@ -3,9 +3,8 @@
 // 1) Captures play only while on screen; with reduced motion they never autoplay (controls instead).
 // 2) Reveals: sections rise into place as they enter; the html.js class is what hides them first,
 //    so without script nothing is hidden.
-// 3) The progress hairline at the top, and a little parallax on the hero film.
+// 3) The progress hairline at the top.
 // 4) The job, step by step: the step nearest the middle of the screen picks the capture.
-// 5) The motion sequence: a canvas that draws the frame the scroll position asks for.
 
 (function () {
   const html = document.documentElement;
@@ -54,7 +53,7 @@
   if (reduced) {
     for (const v of clips) {
       v.removeAttribute('autoplay'); v.pause();
-      if (!v.closest('.hero-film, .cta-film')) v.controls = true;   // the two ambient films just show their poster
+      v.controls = true;
     }
   } else if (hasIO && clips.length) {
     const io = new IntersectionObserver((entries) => {
@@ -87,25 +86,16 @@
     for (const el of reveals) el.classList.add('in');
   }
 
-  // 3) Progress hairline + hero parallax, one scroll handler, one frame at a time.
+  // 3) Progress hairline, one frame at a time.
   const bar = document.querySelector('.progress i');
-  const film = document.querySelector('.hero-film');
-  const hero = document.querySelector('.hero');
   let ticking = false;
   const onScroll = () => {
-    if (ticking) return;
+    if (!bar || ticking) return;
     ticking = true;
     requestAnimationFrame(() => {
       ticking = false;
-      const y = window.scrollY || 0;
-      if (bar) {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        bar.style.transform = `scaleX(${max > 0 ? clamp(y / max, 0, 1) : 0})`;
-      }
-      if (film && hero && !reduced && window.innerWidth > 960 && y < hero.offsetHeight) {
-        film.style.transform = `translate3d(0, ${y * 0.16}px, 0)`;
-      }
-      scrub();
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.transform = `scaleX(${max > 0 ? clamp(window.scrollY / max, 0, 1) : 0})`;
     });
   };
 
@@ -124,56 +114,6 @@
     }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
     for (const s of steps) io.observe(s);
     setStep(0);
-  }
-
-  // 5) The motion sequence. 48 WebP frames, drawn to a canvas at the scroll's position.
-  //    Frames load when the section is within a screen of the viewport; until they all have,
-  //    the poster under the canvas is what shows.
-  const motion = document.querySelector('[data-scrub]');
-  let scrub = () => {};
-  if (motion && !reduced && hasIO) {
-    const n = parseInt(motion.dataset.frames, 10) || 0;
-    const tpl = motion.dataset.src;
-    const canvas = motion.querySelector('.motion-canvas');
-    const ctx = canvas && canvas.getContext('2d');
-    const marks = motion.querySelectorAll('.motion-steps li');
-    const frames = [];
-    let loaded = 0, ready = false, started = false, cur = -1;
-    const draw = (i) => {
-      if (!ready || i === cur) return;
-      cur = i;
-      ctx.drawImage(frames[i], 0, 0, canvas.width, canvas.height);
-    };
-    const load = () => {
-      if (started) return;
-      started = true;
-      for (let i = 0; i < n; i++) {
-        const im = new Image();
-        im.decoding = 'async';
-        im.onload = im.onerror = () => {
-          loaded++;
-          if (loaded === n && !ready) { ready = true; canvas.classList.add('is-ready'); cur = -1; scrub(); }
-        };
-        im.src = tpl.replace('{i}', String(i).padStart(2, '0'));
-        frames.push(im);
-      }
-    };
-    scrub = () => {
-      const r = motion.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
-      if (r.bottom < 0 || r.top > window.innerHeight) return;
-      const p = span > 0 ? clamp(-r.top / span, 0, 1) : 1;
-      draw(Math.round(p * (n - 1)));
-      let now = -1;
-      marks.forEach((m, i) => { if (p >= parseFloat(m.dataset.at || '0')) now = i; });
-      marks.forEach((m, i) => { m.classList.toggle('is-on', i <= now); m.classList.toggle('is-now', i === now); });
-    };
-    const near = new IntersectionObserver((entries) => {
-      for (const e of entries) if (e.isIntersecting) { load(); near.disconnect(); }
-    }, { rootMargin: '100% 0px' });
-    near.observe(motion);
-  } else if (motion) {
-    for (const m of motion.querySelectorAll('.motion-steps li')) m.classList.add('is-on');
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
